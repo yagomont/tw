@@ -1,0 +1,182 @@
+#!/bin/bash
+# server restarter watchdog
+
+#### edit as needed ##########
+version="1.2"
+pack="Enigmatica 2 Expert"
+packid="enig"
+cfgfile="/home/minecraft/watchdog.cfg"
+logfile="/home/minecraft/watchdog.log"
+lock="/home/minecraft/wlock"
+##############################
+#### load variables ##########
+# will override defaults! ####
+. $cfgfile 2>/dev/null || echo "Failed to load configuration at" $cfgfile ", using defaults"
+
+#lock="/home/yago/wlock"
+
+intro(){
+echo "ToastedWatchdog for "$pack" by yagoply"
+echo "Will start monitoring Minecraft in 8 seconds, press Ctrl+C to cancel."
+#echo "Create "$lock" with touch command to stop the watchdog from doing anything."
+echo "Run watchdog -h for help"
+echo ""
+}
+
+startMinecraft(){
+# uses a function I put in bashrc
+# you can still point this to lgsm itself
+bash /home/minecraft/$packid start
+}
+
+stopMinecraft(){
+# is actually safe
+# don't freak out over sigkill
+# sigterm wont do anything to frozen minecraft
+# i don't even know why i put this here, but just to be safe.
+# you can comment this line if you want
+killall -s 9 java
+}
+
+broadcast(){
+if [ "$daemonized" == "true" ]; then
+tmux send -t $packid say "$msg" ENTER
+msg=""
+fi
+}
+
+# Use case to determine what the watchdog will do
+mainLoop(){
+# Avoid running if there is another watchdog open
+wcheck=$(ps -u minecraft | grep -i watchdog | wc -l)
+#echo $wcheck
+if [ "$wcheck" -lt "3" ]; then
+echo "(wcheck)" "Starting watchdog..."
+msg=" §2§l[ToastedWatchdog]§r§a Started as a service"; broadcast
+else
+echo "(wcheck)" "Another watchdog exists. Exiting with error code 1"
+msg=" §4§l[ToastedWatchdog]§r§c An attempt to start the watchdog was made unsuccesfully."; broadcast
+exit 1
+fi
+
+sleep 3
+while true; do
+        sleep 5
+        check=$(ps -e | grep -i java)
+        if [ "$check" == "" ]; then
+        # Minecraft is not running, reboot it!
+        echo "(check)" Minecraft is not running.
+        isRunning='no' # isRunning is here if you want to plug anything into this script, you can grab yes or no from it
+        #sleep 0.8 <- 'interactiveness' delays... whatever that is i came up with
+                if [ -f "$lock" ]; then
+                echo Watchdog was locked by $lock, ignoring.
+                else
+                echo "(log)" Trying to start Minecraft on "["$(date)"]" >> $logfile
+                #sleep 0.8
+                stopMinecraft;
+                startMinecraft #|| echo "Things are horribly broken it seems"; break;
+                sleep 10
+                msg=" §2§l[ToastedWatchdog]§r§a Restarted server"; broadcast
+                fi
+        else
+        # Minecraft is running, check again!
+        if [ "$daemonized" != "true" ]; then
+        echo "(check)" Minecraft is running.
+        fi
+        isRunning='yes'
+        fi
+done
+}
+
+showHelp(){
+echo "ToastedWatchdog, a script by yagoply, version" $version
+echo "A watchdog that restarts a Minecraft server automatically"
+echo "Will log attempts to "$logfile
+echo
+echo "Usage:"
+#echo "#######################################  Service  ################################################"
+echo "-d : daemonize, run in as a service in the background"
+#echo "#######################################  Locking  ################################################"
+echo "-l : lock, will lock the watchdog preventing it from doing anything"
+echo "-ul : unlock, will unlock the daemon, restoring functionality."
+#echo "#######################################  Management  #############################################"
+echo "-k : kills the daemon, use if it goes rogue"
+#echo "-r : reloads the daemon to apply updates, or just replace the old one, automatically unlocks it."
+#echo "#######################################  Documentation  ##########################################"
+echo "-b : broadcast a message to the server"
+echo "-h : display this message"
+#echo "##################################################################################################"
+echo "Run watchdog without arguments for interactive mode. This will let you see what it's doing."
+#echo "##################################################################################################"
+}
+
+killWatchdog(){
+echo Killing existing watchdog...
+daemonized="true"
+msg=" §4§l[ToastedWatchdog]§r§c Stopped"; broadcast
+daemonized=""
+killall -s 9 watchdog || echo "(2) Could not find a watchdog to kill."; exit 2
+killall -s 9 bash watchdog
+exit 0
+}
+
+daemonize(){
+#echo "Please end your session manually to detach the watchdog"
+echo "Creating a new daemon..."
+daemonized="true"
+intro
+mainLoop & disown
+exit 0
+}
+
+lock(){
+if [ -f "$lock" ]; then
+echo "(3) Watchdog already locked"; exit 3
+else
+touch $lock
+fi
+}
+
+unlock(){
+rm $lock 2>/dev/null || echo "(4) Watchdog already unlocked"; exit 4
+}
+
+# determine what the watchdog will run
+
+broadcastMessage(){
+daemonized="true"
+read -p "Broadcast to server: " append
+
+tag=" §6§l[TW/Broadcast]§r§c "
+msg=$tag$append; broadcast
+daemonized=""
+}
+
+case "$1" in 
+        "-k")
+                killWatchdog
+                ;;
+        "-h")
+                showHelp
+                ;;
+        "")
+                intro;  mainLoop
+                ;;
+        "-d")
+                daemonize
+                ;;
+        "-l")
+                lock
+                ;;
+        "-ul")
+                unlock
+                ;;
+        "-b")
+                broadcastMessage
+                ;;
+        *)
+                echo "Unknown command"; showHelp; exit 1
+                ;;
+esac
+
+
