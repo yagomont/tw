@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ToastedWatchdog
 
 A script for ToastedNetwork authored by yagoply
@@ -17,6 +16,3 @@ Usage:
 Run watchdog without arguments for interactive mode. This will let you see what it's doing.
 
 TBD: Crash loop detection
-=======
-placeholder
->>>>>>> 6390babccd37180b9ac806d9c141d938da12de74
