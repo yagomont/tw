@@ -36,6 +36,7 @@ export daemonized=$daemonized
 while true; do
 isRunning=$(cat .wcld.com)
 sleep 2.5
+if [ ! -f $lock ]; then
         if [ "$isRunning" == "no" ]; then
         touch $wcld
         isTracking="yes"
@@ -69,7 +70,9 @@ sleep 1
                         fi
         fi
                 fi
+    
         fi
+fi
 done
 
 }
