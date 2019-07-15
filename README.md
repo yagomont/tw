@@ -23,4 +23,3 @@ Usage:
 
 Run watchdog without arguments for interactive mode. This will let you see what it's doing.
 
-TBD: Crash loop detection
