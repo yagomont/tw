@@ -1,19 +1,31 @@
 #!/bin/bash
 # server restarter watchdog
 
-#### edit as needed ##########
-version="1.2"
+# defaults
+version="1.4"
 pack="Enigmatica 2 Expert"
 packid="enig"
 cfgfile="/home/minecraft/watchdog.cfg"
 logfile="/home/minecraft/watchdog.log"
+modfile="/home/minecraft/watchdog.mod"
+modload="/home/minecraft/watchdog.cfg"
 lock="/home/minecraft/wlock"
-##############################
-#### load variables ##########
-# will override defaults! ####
+
+# load variables
+# will override defaults
 . $cfgfile 2>/dev/null || echo "Failed to load configuration at" $cfgfile ", using defaults"
 
 #lock="/home/yago/wlock"
+
+# fix permissions
+chmod +x $cfgfile 2>/dev/null
+chmod +x $modfile 2>/dev/null
+
+# packid handler
+packidAppend=$(echo $packid)
+packidString="Server"
+packid=$packidAppend$packidString
+
 
 intro(){
 echo "ToastedWatchdog for "$pack" by yagoply"
@@ -26,7 +38,7 @@ echo ""
 startMinecraft(){
 # uses a function I put in bashrc
 # you can still point this to lgsm itself
-bash /home/minecraft/$packid start
+bash /home/minecraft/$packid/$packidAppend start
 }
 
 stopMinecraft(){
@@ -40,24 +52,39 @@ killall -s 9 java
 
 broadcast(){
 if [ "$daemonized" == "true" ]; then
-tmux send -t $packid say "$msg" ENTER
+echo "(debug/sent)"$msg
+tmux send -t $packidAppend say "$msg" ENTER
 msg=""
+else 
+echo "(debug/silenced)"$msg
 fi
 }
 
-# Use case to determine what the watchdog will do
 mainLoop(){
 # Avoid running if there is another watchdog open
 wcheck=$(ps -u minecraft | grep -i watchdog | wc -l)
 #echo $wcheck
 if [ "$wcheck" -lt "3" ]; then
-echo "(wcheck)" "Starting watchdog..."
-msg=" §2§l[ToastedWatchdog]§r§a Started as a service"; broadcast
+echo "(wcheck)" "Starting watchdog on "$packidAppend"..."
+echo "(debug)" "PackidHandler: "$packidAppend","$packid
+packAppend="§a, §adaemon §amode"
+packd=$pack$packAppend
+pmsg=" §2[ToastedWatchdog]§r §aStarted §aon §r";msg=$pmsg$packd; broadcast
+pmsg=" §2[ToastedWatchdog]§r §aver. ";msg=$pmsg$version; broadcast 
 else
 echo "(wcheck)" "Another watchdog exists. Exiting with error code 1"
-msg=" §4§l[ToastedWatchdog]§r§c An attempt to start the watchdog was made unsuccesfully."; broadcast
+msg=" §4[ToastedWatchdog]§r §cAn §cattempt §cto §cstart §cthe §cwatchdog §cwas §cmade §cunsuccesfully."; broadcast
 exit 1
 fi
+
+# Load modular functions. Can be loaded from external files as well.
+. $modfile 2>/dev/null || echo "Can't find any external modules in" $modfile
+# Register functions to be loaded
+        isModLoadingPhase="true"
+        export daemonized=$daemonized
+        . $modload 2>/dev/null || echo "Can't find module loading directives in" $modload
+# Complete module loading phase
+        isModLoadingPhase="false"
 
 sleep 3
 while true; do
@@ -65,25 +92,29 @@ while true; do
         check=$(ps -e | grep -i java)
         if [ "$check" == "" ]; then
         # Minecraft is not running, reboot it!
+        if [ "$daemonized" != "true" ]; then
         echo "(check)" Minecraft is not running.
-        isRunning='no' # isRunning is here if you want to plug anything into this script, you can grab yes or no from it
-        #sleep 0.8 <- 'interactiveness' delays... whatever that is i came up with
+        fi
+        isRunning="no" # isRunning is here if you want to plug anything into this script
+        echo $isRunning > .wcld.com
                 if [ -f "$lock" ]; then
+                if [ "$daemonized" != "true" ]; then
                 echo Watchdog was locked by $lock, ignoring.
+                fi
                 else
-                echo "(log)" Trying to start Minecraft on "["$(date)"]" >> $logfile
-                #sleep 0.8
+                echo "(log)" Trying to start Minecraft on "["$(date)"], WT "$version >> $logfile
                 stopMinecraft;
-                startMinecraft #|| echo "Things are horribly broken it seems"; break;
-                sleep 10
-                msg=" §2§l[ToastedWatchdog]§r§a Restarted server"; broadcast
+                startMinecraft;
+                sleep 100
+                msg=" §2[ToastedWatchdog]§r Restarted server"; broadcast
                 fi
         else
         # Minecraft is running, check again!
         if [ "$daemonized" != "true" ]; then
         echo "(check)" Minecraft is running.
         fi
-        isRunning='yes'
+        isRunning="yes"
+        echo $isRunning > .wcld.com
         fi
 done
 }
@@ -94,35 +125,35 @@ echo "A watchdog that restarts a Minecraft server automatically"
 echo "Will log attempts to "$logfile
 echo
 echo "Usage:"
-#echo "#######################################  Service  ################################################"
 echo "-d : daemonize, run in as a service in the background"
-#echo "#######################################  Locking  ################################################"
 echo "-l : lock, will lock the watchdog preventing it from doing anything"
 echo "-ul : unlock, will unlock the daemon, restoring functionality."
-#echo "#######################################  Management  #############################################"
 echo "-k : kills the daemon, use if it goes rogue"
-#echo "-r : reloads the daemon to apply updates, or just replace the old one, automatically unlocks it."
-#echo "#######################################  Documentation  ##########################################"
 echo "-b : broadcast a message to the server"
 echo "-h : display this message"
-#echo "##################################################################################################"
 echo "Run watchdog without arguments for interactive mode. This will let you see what it's doing."
-#echo "##################################################################################################"
 }
 
 killWatchdog(){
 echo Killing existing watchdog...
+silenceString="-s"
+if [ "$2" != "$silenceString" ]; then
 daemonized="true"
-msg=" §4§l[ToastedWatchdog]§r§c Stopped"; broadcast
-daemonized=""
+else
+daemonized="false"
+echo "(debug)" "silenced"
+fi
+msg=" §4[ToastedWatchdog]§r §cStopped!"; broadcast
+daemonized="false"
 killall -s 9 watchdog || echo "(2) Could not find a watchdog to kill."; exit 2
 killall -s 9 bash watchdog
 exit 0
 }
 
 daemonize(){
-#echo "Please end your session manually to detach the watchdog"
 echo "Creating a new daemon..."
+echo "Press Ctrl+C to detach it, or leave your session."
+export daemonized="true"
 daemonized="true"
 intro
 mainLoop & disown
@@ -141,16 +172,16 @@ unlock(){
 rm $lock 2>/dev/null || echo "(4) Watchdog already unlocked"; exit 4
 }
 
-# determine what the watchdog will run
-
 broadcastMessage(){
 daemonized="true"
 read -p "Broadcast to server: " append
 
-tag=" §6§l[TW/Broadcast]§r§c "
+tag=" §6§l[TW/Broadcast]§r "
 msg=$tag$append; broadcast
 daemonized=""
 }
+
+# detect arguments
 
 case "$1" in 
         "-k")
@@ -178,5 +209,4 @@ case "$1" in
                 echo "Unknown command"; showHelp; exit 1
                 ;;
 esac
-
 
