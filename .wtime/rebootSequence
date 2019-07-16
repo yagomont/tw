@@ -10,6 +10,6 @@ export packidString=$packidString
 export packidAppend=$packidAppend
 
 export msgAppend='Going down for scheduled restart NOW!'; . /home/minecraft/watchdog -i
-. /home/minecraft/'$packid'/'$packidAppend' stop
+. /home/minecraft/$packid/$packidAppend stop
 . /home/minecraft/watchdog -ul
 
