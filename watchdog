@@ -1,8 +1,9 @@
 #!/bin/bash
 # server restarter watchdog
 
+# do not edit unless making a commit
+version="1.5: Apple Jelly"
 # defaults
-version="1.4"
 pack="Enigmatica 2 Expert"
 packid="enig"
 cfgfile="/home/minecraft/watchdog.cfg"
@@ -26,7 +27,6 @@ packidAppend=$(echo $packid)
 packidString="Server"
 packid=$packidAppend$packidString
 
-
 intro(){
 echo "ToastedWatchdog for "$pack" by yagoply"
 echo "Will start monitoring Minecraft in 8 seconds, press Ctrl+C to cancel."
@@ -38,6 +38,9 @@ echo ""
 startMinecraft(){
 # uses a function I put in bashrc
 # you can still point this to lgsm itself
+packidAppend=$(echo $packidAppend)
+packidString="Server"
+packid=$packidAppend$packidString
 bash /home/minecraft/$packid/$packidAppend start
 }
 
@@ -58,6 +61,11 @@ msg=""
 else 
 echo "(debug/silenced)"$msg
 fi
+}
+
+warnRestart(){
+sleep 100
+msg=" §2[ToastedWatchdog]§r Restarted server"; broadcast
 }
 
 mainLoop(){
@@ -82,6 +90,10 @@ fi
 # Register functions to be loaded
         isModLoadingPhase="true"
         export daemonized=$daemonized
+        export lock=$lock
+        export cfgfile=$cfgfile
+        export packid=$packid
+        export packidAppend=$packidAppend
         . $modload 2>/dev/null || echo "Can't find module loading directives in" $modload
 # Complete module loading phase
         isModLoadingPhase="false"
@@ -105,8 +117,7 @@ while true; do
                 echo "(log)" Trying to start Minecraft on "["$(date)"], WT "$version >> $logfile
                 stopMinecraft;
                 startMinecraft;
-                sleep 100
-                msg=" §2[ToastedWatchdog]§r Restarted server"; broadcast
+                warnRestart &
                 fi
         else
         # Minecraft is running, check again!
@@ -178,8 +189,16 @@ read -p "Broadcast to server: " append
 
 tag=" §6§l[TW/Broadcast]§r "
 msg=$tag$append; broadcast
-daemonized=""
+daemonized="false"
 }
+
+broadcastInternal(){
+daemonized="true"
+tag=" §6[ToastedWatchdog]§r "
+msg=$tag$msgAppend; broadcast
+daemonized="false"
+}
+
 
 # detect arguments
 
@@ -205,8 +224,12 @@ case "$1" in
         "-b")
                 broadcastMessage
                 ;;
+        "-i")
+                broadcastInternal
+                ;;
         *)
                 echo "Unknown command"; showHelp; exit 1
                 ;;
 esac
+
 

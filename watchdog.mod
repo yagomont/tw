@@ -5,9 +5,13 @@
 # Functions must be referenced in watchdog.cfg
 
 export daemonized=$daemonized
+export lock=$lock
+export cfgfile=$cfgfile
+export packid=$packid
+export packidAppend=$packidAppend
 
 asyncCrashLoopDetection(){
-echo "(debug) asyncCrashLoopDetection is running"
+echo "(debug) asyncCrashLoopDetection is running on "$packidAppend
 declare -i timeAlive=0
 while true; do
 isRunning=$(cat .wcld.com)
@@ -27,7 +31,7 @@ done
 simpleCrashLoopDetection(){
 # Attempt to detect a crash loop and lock the watchdog in case. 
 # Warn staff, as well.
-echo "(debug) simpleCrashLoopDetection is running"
+echo "(debug) simpleCrashLoopDetection is running on "$packidAppend
 msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Crash-Loop Prevention"; broadcast
 wcld=".wcld.lock"
 rm $wcld 2>/dev/null
@@ -70,7 +74,7 @@ sleep 1
                         fi
         fi
                 fi
-    
+
         fi
 fi
 done
@@ -78,3 +82,35 @@ done
 }
 
 
+serverRestartScheduler(){
+# Schedule a restart for 5am EST
+msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Restart Scheduler"; broadcast
+echo "(debug) serverRestartScheduler is running on "$packidAppend
+
+isModLoadingPhase="false"
+. $cfgfile
+#packid="enigServer"
+packidAppend=$(echo $packid)
+packidString="Server"
+packid=$packidAppend$packidString
+while true; do
+sleep 1000
+atcheck=$(atq | wc -l)
+if [ "$atcheck" -eq "0" ]; then
+if [ "$daemonized" == "true" ]; then
+if [ ! -f $lock ]; then
+echo 'bash /home/minecraft/.wtime/15min' | at 4:45 -M
+echo 'bash /home/minecraft/.wtime/5min' | at 4:55 -M
+echo 'bash /home/minecraft/.wtime/1min' | at 4:59 -M
+echo 'bash /home/minecraft/.wtime/rebootSequence' | at 5:00 -M
+        if [ "$packidAppend" == "enig" ]; then
+        echo 'bash /home/minecraft/.wtime/15min' | at 17:45 -M
+        echo 'bash /home/minecraft/.wtime/5min' | at 17:55 -M
+        echo 'bash /home/minecraft/.wtime/1min' | at 17:59 -M
+        echo 'bash /home/minecraft/.wtime/rebootSequence' | at 18:00 -M
+        fi
+fi
+fi
+fi
+done
+}

@@ -1,0 +1,12 @@
+#!/bin/bash
+isModLoadingPhase=false
+. /home/minecraft/watchdog.cfg
+
+packidAppend=$(echo $packid)
+packidString="Server"
+packid=$packidAppend$packidString
+export packid=$packid
+export packidString=$packidString
+export packidAppend=$packidAppend
+
+export msgAppend='Server restarting in 5 minutes'; . /home/minecraft/watchdog -i
