@@ -36,20 +36,13 @@ echo ""
 }
 
 startMinecraft(){
-# uses a function I put in bashrc
-# you can still point this to lgsm itself
 packidAppend=$(echo $packidAppend)
 packidString="Server"
 packid=$packidAppend$packidString
 bash /home/minecraft/$packid/$packidAppend start
 }
 
-stopMinecraft(){
-# is actually safe
-# don't freak out over sigkill
-# sigterm wont do anything to frozen minecraft
-# i don't even know why i put this here, but just to be safe.
-# you can comment this line if you want
+stopMinecraft()
 killall -s 9 java
 }
 
