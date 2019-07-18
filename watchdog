@@ -2,7 +2,7 @@
 # server restarter watchdog
 
 # do not edit unless making a commit
-version="1.5: Apple Jelly"
+version="1.6: Blueberry Jam"
 # defaults
 pack="Enigmatica 2 Expert"
 packid="enig"
@@ -17,6 +17,11 @@ lock="/home/minecraft/wlock"
 . $cfgfile 2>/dev/null || echo "Failed to load configuration at" $cfgfile ", using defaults"
 
 #lock="/home/yago/wlock"
+
+# expose arguments
+export exportedArgs="$@"
+export exportedStwo="$@"
+
 
 # fix permissions
 chmod +x $cfgfile 2>/dev/null
@@ -36,13 +41,20 @@ echo ""
 }
 
 startMinecraft(){
+# uses a function I put in bashrc
+# you can still point this to lgsm itself
 packidAppend=$(echo $packidAppend)
 packidString="Server"
 packid=$packidAppend$packidString
 bash /home/minecraft/$packid/$packidAppend start
 }
 
-stopMinecraft()
+stopMinecraft(){
+# is actually safe
+# don't freak out over sigkill
+# sigterm wont do anything to frozen minecraft
+# i don't even know why i put this here, but just to be safe.
+# you can comment this line if you want
 killall -s 9 java
 }
 
@@ -56,9 +68,17 @@ echo "(debug/silenced)"$msg
 fi
 }
 
+sendCommand(){
+tmux send -t $packidAppend "$command" ENTER
+}
+
+
 warnRestart(){
 sleep 100
-msg=" §2[ToastedWatchdog]§r Restarted server"; broadcast
+
+msgA=" §2[ToastedWatchdog/Restart]§r Took action @ "
+msgB=$crashDate
+msg=$msgA$msgB; broadcast
 }
 
 mainLoop(){
@@ -68,13 +88,12 @@ wcheck=$(ps -u minecraft | grep -i watchdog | wc -l)
 if [ "$wcheck" -lt "3" ]; then
 echo "(wcheck)" "Starting watchdog on "$packidAppend"..."
 echo "(debug)" "PackidHandler: "$packidAppend","$packid
-packAppend="§a, §adaemon §amode"
-packd=$pack$packAppend
+packd=$pack
 pmsg=" §2[ToastedWatchdog]§r §aStarted §aon §r";msg=$pmsg$packd; broadcast
 pmsg=" §2[ToastedWatchdog]§r §aver. ";msg=$pmsg$version; broadcast 
 else
 echo "(wcheck)" "Another watchdog exists. Exiting with error code 1"
-msg=" §4[ToastedWatchdog]§r §cAn §cattempt §cto §cstart §cthe §cwatchdog §cwas §cmade §cunsuccesfully."; broadcast
+#msg=" §4[ToastedWatchdog]§r §cAn §cattempt §cto §cstart §cthe §cwatchdog §cwas §cmade §cunsuccesfully."; broadcast
 exit 1
 fi
 
@@ -107,7 +126,8 @@ while true; do
                 echo Watchdog was locked by $lock, ignoring.
                 fi
                 else
-                echo "(log)" Trying to start Minecraft on "["$(date)"], WT "$version >> $logfile
+                crashDate=$(date)
+                echo "(log)" Trying to start Minecraft on "["$crashDate"], TW "$version >> $logfile
                 stopMinecraft;
                 startMinecraft;
                 warnRestart &
@@ -124,18 +144,22 @@ done
 }
 
 showHelp(){
-echo "ToastedWatchdog, a script by yagoply, version" $version
-echo "A watchdog that restarts a Minecraft server automatically"
+echo "ToastedWatchdog, a script by Fully Toasted, version" $version
+echo "A watchdog that watches a Minecraft server, automating a few aspects of maintenance,"
+echo "and a shell toolkit for Fully Toasted's Minecraft servers."
 echo "Will log attempts to "$logfile
 echo
 echo "Usage:"
-echo "-d : daemonize, run in as a service in the background"
-echo "-l : lock, will lock the watchdog preventing it from doing anything"
-echo "-ul : unlock, will unlock the daemon, restoring functionality."
-echo "-k : kills the daemon, use if it goes rogue"
-echo "-b : broadcast a message to the server"
-echo "-h : display this message"
-echo "Run watchdog without arguments for interactive mode. This will let you see what it's doing."
+echo "-d, start -> daemonize, run in as a service in the background."
+echo "-l, lock, pause -> lock, will lock the watchdog preventing it from doing anything."
+echo "-ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality."
+echo "-k, kill, stop ->  kills the daemon, stopping all of its functions."
+echo "-b [MESSAGE] -> broadcast a message to the server."
+echo "-h, help -> display this message."
+echo "-ss, shutdown [TIME IN SECONDS] -> schedule a graceful server shutdown, waiting [TIME IN SECONDS]. Unlock the watchdog manually afterwards."
+echo "-sr, restart [TIME IN SECONDS] -> schedule a graceful server restart, waiting [TIME IN SECONDS]."
+echo "-up, reload -> reloads the watchdog, applies updates."
+echo -e "\"\", interactive -> runs the watchdog in debug mode. Will not detach from your shell!"
 }
 
 killWatchdog(){
@@ -147,7 +171,7 @@ else
 daemonized="false"
 echo "(debug)" "silenced"
 fi
-msg=" §4[ToastedWatchdog]§r §cStopped!"; broadcast
+msg=" §4[ToastedWatchdog]§r Stopped!"; broadcast
 daemonized="false"
 killall -s 9 watchdog || echo "(2) Could not find a watchdog to kill."; exit 2
 killall -s 9 bash watchdog
@@ -176,12 +200,16 @@ unlock(){
 rm $lock 2>/dev/null || echo "(4) Watchdog already unlocked"; exit 4
 }
 
+#export exportedArgs="$@"
+
 broadcastMessage(){
 daemonized="true"
-read -p "Broadcast to server: " append
-
-tag=" §6§l[TW/Broadcast]§r "
-msg=$tag$append; broadcast
+tag="  §6[Broadcast]§r"
+preMsg=$tag$exportedArgs
+preMsg=$(echo $preMsg | sed 's/\-b//g') 
+space=" "
+msg=$space$preMsg
+broadcast;
 daemonized="false"
 }
 
@@ -192,33 +220,119 @@ msg=$tag$msgAppend; broadcast
 daemonized="false"
 }
 
+applyUpdate(){
+#. /home/minecraft/watchdog -k
+sleep 0.1
+msgAppend="Applying update..."; broadcastInternal
+sleep 0.8
+. /home/minecraft/watchdog -d &
+disown
+exit 0
+}
+
+
+scheduleRestartManual(){
+# manually restart the server by setting seconds til reboot
+if [ "$exportedStwo" -gt 60 ]; then
+sec=$exportedStwo
+sec15=$(( sec - 900 ))
+sec5=$(( sec - 300 ))
+sec1=$(( sec - 60 ))
+echo $sec15
+echo $sec5
+echo $sec1
+if [ "$sec15" -gt 0 ]; then
+sleep $sec15
+bash /home/minecraft/.wtime/15min &
+fi
+ 
+if [ "$sec5" -gt 0 ]; then
+sleep $sec5
+bash /home/minecraft/.wtime/5min' &
+fi
+ 
+if [ "$sec1" -gt 0 ]; then
+sleep $sec1
+bash /home/minecraft/.wtime/1min &  
+fi
+
+sleep 60
+bash /home/minecraft/.wtime/rebootSequence &
+else
+echo "Cannot schedule to less than 60 seconds!"
+fi
+}
+
+scheduleStopManual(){
+# manually restart the server by setting seconds til reboot
+if [ "$exportedStwo" -gt 60 ]; then
+sec=$exportedStwo
+sec15=$(( sec - 900 ))
+sec5=$(( sec - 300 ))
+sec1=$(( sec - 60 ))
+echo $sec15
+echo $sec5
+echo $sec1
+if [ "$sec15" -gt 0 ]; then
+sleep $sec15
+bash /home/minecraft/.wtime/15min &
+fi
+ 
+if [ "$sec5" -gt 0 ]; then
+sleep $sec5
+bash /home/minecraft/.wtime/5min' &
+fi
+ 
+if [ "$sec1" -gt 0 ]; then
+sleep $sec1
+bash /home/minecraft/.wtime/1min &  
+fi
+
+sleep 60
+bash /home/minecraft/.wtime/stopSequence &
+else
+echo "Cannot schedule to less than 60 seconds!"
+fi
+}
+
+
+
 
 # detect arguments
 
 case "$1" in 
-        "-k")
+        "-k"|"kill"|"stop")
                 killWatchdog
                 ;;
-        "-h")
+        "-h"|"help")
                 showHelp
                 ;;
-        "")
+        ""|"interactive")
                 intro;  mainLoop
                 ;;
-        "-d")
+        "-d"|"daemon"|"start")
                 daemonize
                 ;;
-        "-l")
+        "-l"|"lock"|"pause")
                 lock
                 ;;
-        "-ul")
+        "-ul"|"unlock"|"resume")
                 unlock
+                ;;
+        "-up"|"update"|"reload")
+                applyUpdate
                 ;;
         "-b")
                 broadcastMessage
                 ;;
         "-i")
                 broadcastInternal
+                ;;
+        "-ss"|"shutdown")
+                scheduleStopManual
+                ;;
+        "-sr"|"restart")
+                scheduleRestartManual
                 ;;
         *)
                 echo "Unknown command"; showHelp; exit 1

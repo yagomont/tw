@@ -32,7 +32,7 @@ simpleCrashLoopDetection(){
 # Attempt to detect a crash loop and lock the watchdog in case. 
 # Warn staff, as well.
 echo "(debug) simpleCrashLoopDetection is running on "$packidAppend
-msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Crash-Loop Prevention"; broadcast
+#msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Crash-Loop Prevention"; broadcast
 wcld=".wcld.lock"
 rm $wcld 2>/dev/null
 export daemonized=$daemonized
@@ -84,7 +84,7 @@ done
 
 serverRestartScheduler(){
 # Schedule a restart for 5am EST
-msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Restart Scheduler"; broadcast
+#msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Restart Scheduler"; broadcast
 echo "(debug) serverRestartScheduler is running on "$packidAppend
 
 isModLoadingPhase="false"
@@ -114,3 +114,37 @@ fi
 fi
 done
 }
+
+
+antiVanish(){
+# Fixes vanishing players on login on Enigmatica
+#msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: VanishFix"; broadcast
+echo "(debug) antiVanish is running on "$packidAppend
+sleepTime="5"
+while true; do
+sleep $sleepTime
+nline=$(tail -n 12 /home/minecraft/serverLogs/latest.log | grep -i "Sent config to"  -)
+nlineCount=$(tail -n 12 /home/minecraft/serverLogs/latest.log | grep -i "Sent config to"  - | wc -l)
+if [ "$nlineCount" == "1" ]; then
+pGetPlayer=${nline%".'"}
+pGetPlayer=${pGetPlayer##*\'}
+VanishPrefix="/v "
+VanishSuffix=" no"
+pVanishCommand=$VanishPrefix$pGetPlayer
+pVanishCommand=$pVanishCommand$VanishSuffix
+if [ "$pIsVanished" == "true" ]; then
+        # player is vanished, wait another player.
+        if [ "$vanishedPlayer" != "$pGetPlayer" ]; then
+        pIsVanished="no"
+        sleepTime="1"
+fi
+else
+export command=$pVanishCommand
+sendCommand ; pIsVanished="true"; vanishedPlayer=$pGetPlayer; sleepTime="5"
+fi
+fi
+done
+
+}
+
+
