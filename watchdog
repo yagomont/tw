@@ -249,7 +249,7 @@ fi
  
 if [ "$sec5" -gt 0 ]; then
 sleep $sec5
-bash /home/minecraft/.wtime/5min' &
+bash /home/minecraft/.wtime/5min &
 fi
  
 if [ "$sec1" -gt 0 ]; then
@@ -282,7 +282,7 @@ fi
  
 if [ "$sec5" -gt 0 ]; then
 sleep $sec5
-bash /home/minecraft/.wtime/5min' &
+bash /home/minecraft/.wtime/5min &
 fi
  
 if [ "$sec1" -gt 0 ]; then
