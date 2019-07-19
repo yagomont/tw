@@ -235,6 +235,7 @@ scheduleRestartManual(){
 # manually restart the server by setting seconds til reboot
 if [ "$exportedStwo" -gt 60 ]; then
 sec=$exportedStwo
+((sec++))
 sec15=$(( sec - 900 ))
 sec5=$(( sec - 300 ))
 sec1=$(( sec - 60 ))
@@ -267,6 +268,7 @@ scheduleStopManual(){
 # manually restart the server by setting seconds til reboot
 if [ "$exportedStwo" -gt 60 ]; then
 sec=$exportedStwo
+((sec++))
 sec15=$(( sec - 900 ))
 sec5=$(( sec - 300 ))
 sec1=$(( sec - 60 ))
