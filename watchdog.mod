@@ -1,6 +1,13 @@
 #!/bin/bash
 # External Modules for Toasted Watchdog
-# All rights reserved to Fully Toasted
+
+ #/* Copyright (C) 2018-2019 Fully Toasted <fully.toasted.community@gmail.com> - All Rights Reserved
+ #* 
+ #* This file is part of Toasted Watchdog by Fully Toasted, Toasted Watchdog is Proprietary and Confidential.
+ #* Unauthorized copying of this file, project, and associated files via any medium is strictly prohibited.
+ #* 
+ #* Written by Fully Toasted.
+ #*/
 
 # Will be run ONCE in the start of the main loop
 # If you can't fit something you need here, look into editing the watchdog itself!
