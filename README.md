@@ -1,4 +1,4 @@
-****Toasted Watchdog 1.6: Blueberry Jam****  
+****Toasted Watchdog 2.1: No More Jellies or Jams****  
 A Bash program for Linux that watches a Minecraft server, kicking it back to life,  
 every time it fails.  
 
