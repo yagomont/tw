@@ -1,0 +1,12 @@
+#!/bin/bash
+# All rights reserved to Fully Toasted
+# 15-min restart script
+export msgAppend='Server restarting in 15 minutes'; . $execdir/watchdog -i
+sleep 600
+export msgAppend='Server restarting in 5 minutes'; . $execdir/watchdog -i
+sleep 240
+export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
+sleep 60
+. /home/minecraft/$packid/$packidAppend stop
+rm $lock 2>/dev/null
+

@@ -1,17 +1,66 @@
 #!/bin/bash
-# External Modules for ToastedWatchdog
+# External Modules for Toasted Watchdog
+# All rights reserved to Fully Toasted
+
 # Will be run ONCE in the start of the main loop
 # If you can't fit something you need here, look into editing the watchdog itself!
 # Functions must be referenced in watchdog.cfg
-
-export daemonized=$daemonized
-export lock=$lock
-export cfgfile=$cfgfile
-export packid=$packid
-export packidAppend=$packidAppend
+# Export information for the threaded model
+ export threadTickTime=$threadTickTime
+ export masterThreadTickTime=$masterThreadTickTime
+ export threadSpacing=$threadSpacing
+ export numThreads=$numThreads
+# Export lock files for thread control
+ export filew=$filew
+ export filex=$filex
+ export filey=$filey
+# Export configuration
+ export logfile=$logfile
+        export version=$version
+        export lock=$lock
+        export cfgfile=$cfgfile
+        export modfile=$modfile
+        export pack=$pack
+        export logfile=$logfile
+        export modload=$modload
+        export packid=$packid
+        export packidAppend=$packidAppend
+        export execdir=$execdir
 
 asyncCrashLoopDetection(){
 echo "(debug) asyncCrashLoopDetection is running on "$packidAppend
+declare -i timeAlive=0
+declare -i timeRun=0
+while true; do
+sleep 1
+read isRunning < /tmp/toastedWatchdog_isRunning
+        if [ "$isRunning" == "true" ]; then
+        ((timeAlive++))
+        ((timeRun++))
+        else
+        timeAlive=0
+        ((timeRun++))
+        fi
+        # when we finish checking, kill the script
+                if [ "$timeRun" -gt 500 ]; then
+        (( timeAlive + 64 ))
+        if [ "$timeAlive" -lt "$timeRun" ]; then
+        datecl=$(date)
+        echo "(check) Detected crash loop, stopping the watchdog!"
+        echo "(log) Detected crash loop @ "$datecl". Watchdog terminated." >> $logfile
+        daemonized="true"
+        msg=" §4[ToastedWatchdog]§r Crash loop detected! Please contact administration."; broadcast
+        . $execdir/watchdog -k -s
+        break; exit 1
+        else
+        break; exit 0
+        fi
+                fi
+done
+}
+
+asyncCrashLoopDetectionOld(){
+echo "(debug) old asyncCrashLoopDetection is running on "$packidAppend
 declare -i timeAlive=0
 while true; do
 isRunning=$(cat .wcld.com)
@@ -49,7 +98,7 @@ sleep 1
         if [ "$isTracking" == "yes" ]; then
         isTracking="no"
         if [ -f "$wcld" ]; then
-        asyncCrashLoopDetection &
+        asyncCrashLoopDetectionOld &
         fi
         sleep 220
                 if [ -f "wcld" ]; then
@@ -86,51 +135,41 @@ serverRestartScheduler(){
 # Schedule a restart for 5am EST
 #msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: Restart Scheduler"; broadcast
 echo "(debug) serverRestartScheduler is running on "$packidAppend
-
-isModLoadingPhase="false"
-. $cfgfile
-#packid="enigServer"
-packidAppend=$(echo $packid)
-packidString="Server"
-packid=$packidAppend$packidString
+execdir=$(pwd)
+export execdir=$execdir
 while true; do
-sleep 1000
+sleep $restartSleepTime
 atcheck=$(atq | wc -l)
 if [ "$atcheck" -eq "0" ]; then
-if [ "$daemonized" == "true" ]; then
 if [ ! -f $lock ]; then
-echo 'bash /home/minecraft/.wtime/15min' | at 4:45 -M
-echo 'bash /home/minecraft/.wtime/5min' | at 4:55 -M
-echo 'bash /home/minecraft/.wtime/1min' | at 4:59 -M
-echo 'bash /home/minecraft/.wtime/rebootSequence' | at 5:00 -M
-        if [ "$packidAppend" == "enig" ]; then
-        echo 'bash /home/minecraft/.wtime/15min' | at 17:45 -M
-        echo 'bash /home/minecraft/.wtime/5min' | at 17:55 -M
-        echo 'bash /home/minecraft/.wtime/1min' | at 17:59 -M
-        echo 'bash /home/minecraft/.wtime/rebootSequence' | at 18:00 -M
-        fi
-fi
+echo 'bash /home/minecraft/.wtime/15minreboot' | at 4:45 -M
 fi
 fi
 done
 }
 
 
+
 antiVanish(){
-# Fixes vanishing players on login on Enigmatica
+# Fixes vanishing players on login on Enigmatica and Revelations
+# Has extra force-chunk unloading fucntionality to fix a bug in FTB Utilities
 #msg=" §2[ToastedWatchdog]§r §aLoaded §amodule: VanishFix"; broadcast
 echo "(debug) antiVanish is running on "$packidAppend
-sleepTime="5"
 while true; do
-sleep $sleepTime
-nline=$(tail -n 12 /home/minecraft/serverLogs/latest.log | grep -i "Sent config to"  -)
-nlineCount=$(tail -n 12 /home/minecraft/serverLogs/latest.log | grep -i "Sent config to"  - | wc -l)
+#echo "(debug) antiVanish tick"
+sleep $vanishSleepTime
+nline=$(tail -n 12 /home/minecraft/logs/latest.log | grep -i "Sent config to"  -)
+nlineCount=$(tail -n 12 /home/minecraft/logs/latest.log | grep -i "Sent config to"  - | wc -l)
 if [ "$nlineCount" == "1" ]; then
 pGetPlayer=${nline%".'"}
 pGetPlayer=${pGetPlayer##*\'}
 VanishPrefix="/v "
 VanishSuffix=" no"
+ChunkPrefix="sudo "
+ChunkSuffix=" chunks unload_all all "$pGetPlayer
 pVanishCommand=$VanishPrefix$pGetPlayer
+pChunkCommand=$ChunkPrefix$pGetPlayer
+pChunkCommand=$pChunkCommand$ChunkSuffix
 pVanishCommand=$pVanishCommand$VanishSuffix
 if [ "$pIsVanished" == "true" ]; then
         # player is vanished, wait another player.
@@ -140,11 +179,33 @@ if [ "$pIsVanished" == "true" ]; then
 fi
 else
 export command=$pVanishCommand
-sendCommand ; pIsVanished="true"; vanishedPlayer=$pGetPlayer; sleepTime="5"
+command=$pVanishCommand
+sendCommand ; pIsVanished="true"; vanishedPlayer=$pGetPlayer; sleepTime="5";
 fi
+         if [ "$doCacheLogins" == "true" ]; then
+                  checkIsCached=$(cat playerLoginCache | grep -i $pGetPlayer | wc -l)
+                  if [ "$checkIsCached" == "0" ]; then
+                  echo $pGetPlayer >> playerLoginCache
+                  echo "Cached new player" $pGetPlayer
+                        if [ "$doChunkUnloading" == "true" ]; then
+                        echo "Unloaded new player's chunks."
+                        export command=$pChunkCommand; command=$pChunkCommand; sendCommand ;
+                        fi
+                  fi
+         fi
 fi
 done
 
+}
+
+grabWhitelist(){
+echo "(debug) grabWhitelist running on" $packidAppend
+echo "(debug) packidHandler:" $packid
+while true; do
+sleep 300
+. /home/minecraft/$packid/updatewhitelist.sh
+mv -f /home/minecraft/$packid/whitelist.json /home/minecraft/$packid/serverfiles/whitelist.json
+done
 }
 
 
