@@ -438,7 +438,6 @@ case "$exportedStwo" in
         ;;
 esac
 
-<<<<<<< HEAD
 export lock=$lock
 declare -i timeInMinutes=0
 declare -i timeInSeconds=0
@@ -459,38 +458,6 @@ if [ "$isStop" == "true" ]; then
         msgAppend="Staff has scheduled a server stop for "$timeInMinutes" minutes from now."; export msgAppend=$msgAppend; broadcastInternal;
         else
         msgAppend="Staff has scheduled a server restart for "$timeInMinutes" minutes from now."; export msgAppend=$msgAppend; broadcastInternal;
-=======
-scheduleRestartManual(){
-# manually restart the server by setting seconds til reboot
-if [ "$exportedStwo" -gt 60 ]; then
-sec=$exportedStwo
-((sec++))
-sec15=$(( sec - 900 ))
-sec5=$(( sec - 300 ))
-sec1=$(( sec - 60 ))
-echo $sec15
-echo $sec5
-echo $sec1
-if [ "$sec15" -gt 0 ]; then
-sleep $sec15
-bash /home/minecraft/.wtime/15min &
-fi
- 
-if [ "$sec5" -gt 0 ]; then
-sleep $sec5
-bash /home/minecraft/.wtime/5min &
-fi
- 
-if [ "$sec1" -gt 0 ]; then
-sleep $sec1
-bash /home/minecraft/.wtime/1min &  
-fi
-
-sleep 60
-bash /home/minecraft/.wtime/rebootSequence &
-else
-echo "Cannot schedule to less than 60 seconds!"
->>>>>>> 8245047c799e07db23638a89b9ec185e78ac52fb
 fi
 
 msgAppend="Reason: "$reason; export msgAppend=$msgAppend; broadcastInternal;
@@ -515,7 +482,6 @@ sleep 240
 export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
 sleep 60 ; didWait="true"
 fi
-<<<<<<< HEAD
 fi 
 
 if [ "$timeIfGt1Min" -gt 0 ]; then 
@@ -524,12 +490,6 @@ alreadySlept="true"
 sleep $timeIfGt1Min
 export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
 sleep 60; didWait="true"
-=======
- 
-if [ "$sec5" -gt 0 ]; then
-sleep $sec5
-bash /home/minecraft/.wtime/5min &
->>>>>>> 8245047c799e07db23638a89b9ec185e78ac52fb
 fi
 else
 echo "Time was less than one minute. This is not supported."
@@ -606,5 +566,6 @@ case "$1" in
                 echo "Unknown command"; showHelp; exit 1
                 ;;
 esac
+
 
 
