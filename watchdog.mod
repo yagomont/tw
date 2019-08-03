@@ -67,7 +67,6 @@ done
 saveHandler(){
 loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
-#echo "[INFO] packidHandler:" $longPackID
 while true; do
 sleep 2210
 msgAppend="Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;

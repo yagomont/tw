@@ -26,8 +26,12 @@ clear;
         esac
         echo "Syncing up with source... This may fail or be skipped safely."
         sleep 1;
+        rm -rf toasted-watchdog 2>/dev/null
         git clone 2>/dev/null || echo "Updating failed."
-        sleep 1;
+        cp -r toasted-watchdog/* . 2>/dev/null
+        sleep 0.8
+        rm -rf toasted-watchdog 2>/dev/null
+        sleep 0.2;
 clear;
         echo "Select a Minecraft instance by pointing to its folder. (You are in: "$(pwd)")"
         echo "This should be the same folder as the LGSM script is in."
@@ -61,6 +65,7 @@ clear;
         echo "pack=""$pname" >> watchdog.setup.cfg
         iffolder="$ifolder/watchdog/"
         echo "fpid="$packid >> watchdog.setup.cfg
+        echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
         sleep 0.5
@@ -96,7 +101,11 @@ clear;
         echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname" 
         echo "Edit the configuration file at "$iffolder"/watchdog.cfg to this server's needs."
         . /home/$USER/.bashrc
-
+        echo
+        echo 'Press ENTER to reload your shell and exit.'
+        read enter;
+        unset enter
+        bash;
 
 }
 
