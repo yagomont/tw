@@ -45,8 +45,8 @@ clear;
             echo "(Y/n):"
             unset cf
             read cf; case $cf in
-                Y|y|""|" "|yes ) echo -n "";;
-                *) rm $ifolder/watchdog/*;;
+                Y|y|""|" "|yes ) rm $ifolder/watchdog/*;;
+                *) echo -n "";;
                      esac
             fi
         echo "Copying files... "
