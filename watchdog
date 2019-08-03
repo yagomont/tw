@@ -280,6 +280,7 @@ fi
         isModLoadingPhase="false"
         set -a
         sleep 0.3
+	export > vars.dog
         echo "[INFO] Finished loading, press Ctrl+C to detach the watchdog."
 # Spawn a master thread
 spawnMasterThread &
@@ -505,7 +506,6 @@ echo "ProtectAdmin set to disabled"
 fi
 }
 
-export > vars.dog
 
 loadVars(){
 source vars.dog
