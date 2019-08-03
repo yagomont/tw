@@ -39,6 +39,16 @@ clear;
         echo "Instance folder (ex: /home/minecraft/enigServer):"
         read ifolder
         chmod +x * 2>/dev/null
+        if [ -f "$ifolder/watchdog/watchdog" ]; then
+            echo "A old watchdog installation was detected. Remove it first?"
+            echo "Keeping the old one may introduce problems. Say y (yes) here if you are unsure."
+            echo "(Y/n):"
+            unset cf
+            read cf; case $cf in
+                Y|y|""|" "|yes ) echo -n "";;
+                *) rm $ifolder/watchdog/*;;
+                     esac
+            fi
         echo "Copying files... "
         mkdir $ifolder/watchdog 2>/dev/null
         touch firstrun
@@ -59,12 +69,13 @@ clear;
         touch watchdog.setup.cfg
         echo "#!/bin/bash" > watchdog.setup.cfg
         echo "# File automatically generated @ "$dgen >> watchdog.setup.cfg
+        echo 'set -a' >> watchdog.setup.cfg
         echo "" >> watchdog.setup.cfg
-        echo "packidAppend="$packidAppend >> watchdog.setup.cfg
-        echo "packid="$packidAppend >> watchdog.setup.cfg
-        echo "pack=""$pname" >> watchdog.setup.cfg
+        echo "packidAppend="\"$packidAppend\" >> watchdog.setup.cfg
+        echo "packid="\"$packidAppend\" >> watchdog.setup.cfg
+        echo "pack=""\"$pname\"" >> watchdog.setup.cfg
         iffolder="$ifolder/watchdog/"
-        echo "fpid="$packid >> watchdog.setup.cfg
+        echo "fpid="\"$packid\" >> watchdog.setup.cfg
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
