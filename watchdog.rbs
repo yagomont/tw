@@ -1,0 +1,23 @@
+#!/bin/bash
+#/* Copyright (C) 2018-2019 Fully Toasted <fully.toasted.community@gmail.com> - All Rights Reserved
+# *
+# * This file is part of Toasted Watchdog by Fully Toasted, Toasted Watchdog is Proprietary and Confidential.
+# * Unauthorized copying of this file, project, and associated files via any medium is strictly prohibited.
+# *
+# * Written by Fully Toasted.
+# */
+# 15-min restart script
+set -a
+export msgAppend='Server restarting in 15 minutes'; . $execdir/watchdog -i
+sleep 600
+export msgAppend='Server restarting in 5 minutes'; . $execdir/watchdog -i
+sleep 240
+export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
+sleep 58
+export msgAppend='Flushing all chunks to disk. The server is going down NOW.'; . $execdir/watchdog -i
+export command='save-all flush'; . $execdir/watchdog -c
+sleep 4
+export command='stop'; . $execdir/watchdog -c
+rm $lock 2>/dev/null
+rm .wdr 2>/dev/null
+

@@ -1,111 +1,160 @@
 #!/bin/bash
 #/* Copyright (C) 2018-2019 Fully Toasted <fully.toasted.community@gmail.com> - All Rights Reserved
-# * 
+# *
 # * This file is part of Toasted Watchdog by Fully Toasted, Toasted Watchdog is Proprietary and Confidential.
 # * Unauthorized copying of this file, project, and associated files via any medium is strictly prohibited.
-# * 
+# *
 # * Written by Fully Toasted.
 # */
-
+set -a
 # Do not edit unless making a commit
-version="2.1"
+build="TTK 1.0"
 execdir=$(pwd)
 cfgfile=$execdir"/watchdog.cfg"
 modload=$cfgfile
 
+# Run the install script if firstrun doesn't exist
+function firstrun(){
+clear;
+        echo "You are running ToastedWatchdog by Fully Toasted for the first time."
+        echo "This wizard will walk you through the installation of Toasted Watchdog and the Fully Toasted Shell Toolkit (TTK)."
+        echo "By continuing you agree to our terms: "'https://raw.githubusercontent.com/yagomont/toasted-watchdog/master/tos.txt'
+        echo "Continue? (Y/n):"
+        read cf; case $cf in
+                Y|y|""|" " ) echo "";;
+                *) exit 0;;
+        esac
+        echo "Syncing up with source... This may fail or be skipped safely."
+        sleep 1;
+        git clone 2>/dev/null || echo "Updating failed."
+        sleep 1;
+clear;
+        echo "Select a Minecraft instance by pointing to its folder. (You are in: "$(pwd)")"
+        echo "This should be the same folder as the LGSM script is in."
+        echo "Run this script again if need install to another server instance, after you're done."
+        echo "Instance folder (ex: /home/minecraft/enigServer):"
+        read ifolder
+        chmod +x * 2>/dev/null
+        echo "Copying files... "
+        mkdir $ifolder/watchdog 2>/dev/null
+        touch firstrun
+        cp -r * $ifolder/watchdog || echo 'Failed to copy files.' || exit 1 
+        echo 
+        echo "Enter the name of this Minecraft instance. This is important to get right."
+        echo "Instance name (ex: enig) (ex2: revel):"
+        read iname
+        packidString="Server"
+        packidAppend=$iname
+        packid=$packidAppend$packidString
+        echo "Enter the full name of the pack as you'd like it to appear in the Watchdog's messages and prompts."
+        echo "Pack name (ex: Enigmatica 2: Expert):"
+        read pname
+clear;
+        echo "Installing new configuration... "
+        dgen=$(date)
+        touch watchdog.setup.cfg
+        echo "#!/bin/bash" > watchdog.setup.cfg
+        echo "# File automatically generated @ "$dgen >> watchdog.setup.cfg
+        echo "" >> watchdog.setup.cfg
+        echo "packidAppend="$packidAppend >> watchdog.setup.cfg
+        echo "packid="$packidAppend >> watchdog.setup.cfg
+        echo "pack=""$pname" >> watchdog.setup.cfg
+        iffolder="$ifolder/watchdog/"
+        echo "fpid="$packid >> watchdog.setup.cfg
+        cp -r watchdog.setup.cfg $iffolder
+        echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
+        sleep 0.5
+        echo "[1/3] RunAnywhere for "$packidAppend
+        sleep 0.62
+        echo "function" $packidAppend'(){' >> /home/$USER/.ttk
+        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk
+        echo "cd $ifolder" >> /home/$USER/.ttk
+        echo './'"$iname"' $@' >>/home/$USER/.ttk
+        echo "cd "'$currentDir' >> /home/$USER/.ttk
+        echo '}' >> /home/$USER/.ttk
+        echo "[2/3] RunAnywhere for watchdog-"$packidAppend;
+        sleep 0.3
+        # Sorry about the copy-paste here :x
+                echo "function" "watchdog-"$packidAppend'(){' >> /home/$USER/.ttk;
+                        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
+                                echo "cd $iffolder" >> /home/$USER/.ttk;
+                                        echo './'"watchdog"' $@' >>/home/$USER/.ttk;
+                                                echo "cd "'$currentDir' >> /home/$USER/.ttk;
+                                                        echo '}' >> /home/$USER/.ttk;
+        echo "[3/3] RunAnywhere for ttk-"$packidAppend" ";
+        sleep 0.6
+        echo "alias ttk-$iname=watchdog-$iname" >> /home/$USER/.ttk;
+        duplicateCheck=$(cat /home/$USER/.bashrc | grep -i "Added by ToastedWatchdog")
+                if [ "$duplicateCheck" == "" ]; then
+        echo ". /home/$USER/.ttk # Added by ToastedWatchdog" >> /home/$USER/.bashrc;
+                fi
+        rm firstrun 2>/dev/null
+        rm watchdog.setup.cfg 2>/dev/null
+clear;
+        echo "Installation is finished."
+        echo "You may now run the following commands from any place in the server terminal:"
+        echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname" 
+        echo "Edit the configuration file at "$iffolder"/watchdog.cfg to this server's needs."
+        . /home/$USER/.bashrc
+
+
+}
+
+if [ ! -f "firstrun" ]; then
+firstrun; exit 0
+fi
+
 # load variables
-. $cfgfile 2>/dev/null || exit 1
+. $cfgfile 2>/dev/null || exit 1 || echo "[FATAL] Couldn't load configuration file."
+
+if [ "enforceCfg" != true ]; then
+. watchdog.setup.cfg 2>/dev/null
+fi
 
 # Expose arguments and set some things
- filew="/home/minecraft/.w"
- filey="/home/minecraft/.y"
- filex="/home/minecraft/.x"
+ filew=".w"
+ filey=".y"
+ filex=".x"
+ exportedSone=$1
  exportedStwo=$2
  exportedSthree=$3
- export exportedArgs="$@"
- export exportedStwo=$exportedStwo
- export exportedSthree=$exportedSthree
-# Export information for the threaded model
- export threadTickTime=$threadTickTime
- export masterThreadTickTime=$masterThreadTickTime
- export threadSpacing=$threadSpacing
- export numThreads=$numThreads
-# Export lock files for thread control
- export filew=$filew
- export filex=$filex
- export filey=$filey
-# Export configuration
- export logfile=$logfile
-        export version=$version
-        export lock=$lock
-        export cfgfile=$cfgfile
-        export modfile=$modfile
-        export pack=$pack
-        export logfile=$logfile
-        export modload=$modload
-export restartSleepTime=$restartSleepTime
-export vanishSleepTime=$vanishSleepTime
-export whitelistSleepTime=$whitelistSleepTime
-export execdir=$execdir
-export doChunkUnloading=$doChunkUnloading
-export doCacheLogins=$doCachLogins
 # Fix permissions
 chmod +x $cfgfile 2>/dev/null
 chmod +x $modfile 2>/dev/null
 
-registerPackID(){
-# PackID Handler
-packidAppend=$(echo $packid)
-packidString="Server"
-packid=$packidAppend$packidString
-export packid=$packid
-export packidAppend=$packidAppend
-export packidString=""
+# Register Pack ID
+shortPackID=$packidAppend
+longPackID=$fpid
+
+function startMinecraft(){
+
+         /home/minecraft/$longPackID/$shortPackID start &
+
 }
 
-slimRegisterPackID(){
-  packidAppend=$(echo $packid)
-  packidString="Server"
-  packid=$packidAppend$packidString
+function broadcast(){
+
+        loadVars;
+                if [ "$daemonized" == "true" ]; then
+        echo "(debug/sent)"$msg
+        tmux send -t $shortPackID say "$msg" ENTER
+        unset msg
+                else 
+        echo "(debug/silenced)"$msg
+                fi
+
 }
 
+function sendCommand(){
 
+        export command=$command
+        tmux send -t $shortPackID "$command" ENTER
 
-intro(){
-        echo "ToastedWatchdog for "$pack" by Fully Toasted"
-        echo "Will start monitoring Minecraft soon, press Ctrl+C to cancel."
-        echo -e "Run 'watchdog help' for help"
 }
 
-startMinecraft(){
-bash /home/minecraft/$packid/$packidAppend start
-}
-
-stopMinecraft(){
-# Just in case someone tries to reboot the server wrongly.
-killall -s 9 java
-}
-
-broadcast(){
-if [ "$daemonized" == "true" ]; then
-echo "(debug/sent)"$msg
-tmux send -t $packidAppend say "$msg" ENTER
-msg=""
-else 
-echo "(debug/silenced)"$msg
-fi
-}
-
-waitForServer(){
-sleep 90
-rm $lock 2>/dev/null
-}
-
-sendCommand(){
-tmux send -t $packidAppend "$command" ENTER
-}
-
-threadCallRestartHandler(){
+function threadCallRestartHandler(){
+loadVars;
+set -a
 crashDate=$(date)
 filew="/home/minecraft/.w"
         if [ ! -f "$filew" ]; then
@@ -114,36 +163,34 @@ touch $filew
 touch $filex
                         if [ ! -f "$filey" ]; then
                 # Log action
-                echo "(log)" "Server stop detected @" "["$crashDate"], TW "$version >> $logfile
+                echo "[LOG]" "Server stop detected @" "["$crashDate"], "$build >> $logfile
 touch $filey
 
         sleep 18
-        rm $filew
-        rm $filex
-        rm $filey
-        sleep 72
-                # Warn players
-                msgA=" §2[ToastedWatchdog/Restart]§r Took action @ "
-                msgB=$crashDate
-                msg=$msgA$msgB; broadcast
         rm $filew 2>/dev/null
-        rm $filex
-        rm $filey                                               else
+        rm $filex 2>/dev/null
+        rm $filey 2>/dev/null
+        renice -n 9 -p $(pidof -x java) > /dev/null 2>&1
+        sleep 72
+        rm $filew 2>/dev/null
+        rm $filex 2>/dev/null
+        rm $filey 2>/dev/null
+        renice -n 19 -p $(pidof -x java) > /dev/null 2>&1
         # Catch duplicate threads
         # We must ensure Minecraft has started before doing anything else, so we wait
-        rm $filey
+        rm $filey 2>/dev/null
         smtDate=$(date)
         echo "(debug) caught SMT duplicate thread @ "$smtDate >> $logfile
         exit 1
                                         fi
                                         else
-        rm $filex
+        rm $filex 2>/dev/null
         smtDate=$(date)
         echo "(debug) caught SMT duplicate thread @ "$smtDate >> $logfile
         exit 1
                                 fi
                                 else
-        rm $filew
+        rm $filew 2>/dev/null
         smtDate=$(date)
         echo "(debug) caught SMT duplicate thread @ "$smtDate >> $logfile
         exit 1
@@ -151,35 +198,18 @@ touch $filey
         fi
 }
 
-warnRestartOld(){
-crashDate=$(date)
-sleep 100
-msgA=" §2[ToastedWatchdog/Restart]§r Took action @ "
-msgB=$crashDate
-msg=$msgA$msgB; broadcast
-}
-
-spawnMasterThread(){
-        export logfile=$logfile
-        export version=$version
-        export lock=$lock
-        export filew=$filew
-        export filey=$filey
-        export filex=$filex
-        export packidAppend=$packidAppend
-        export packid=$packid
-        export execdir=$execdir
-
+function spawnMasterThread(){
+set +a
+loadVars;
         while true; do
         sleep $masterThreadTickTime
-        checkIsAlive=$(ps -e | grep -i java)
-                if [ "$checkIsAlive" == "" ]; then
+        try=$(ps -h -w -w | grep -i $lookFor)
+                if [ "$try" == "" ]; then
                 echo "false" > /tmp/toastedWatchdog_isRunning
                         if [ ! -f "$lock" ]; then
                                 if [ ! -f "$filew" ]; then
                         startMinecraft &
                         threadCallRestartHandler &
-                        #asyncCrashLoopDetection &
                                 fi
                         fi
                 else
@@ -188,55 +218,26 @@ spawnMasterThread(){
         done
 }
 
-spawnNormalThread(){
-        export logfile=$logfile
-        export version=$version
-        export lock=$lock
-        export filew=$filew
-        export filey=$filey
-        export filex=$filex
-        export packidAppend=$packidAppend
-        export packid=$packid
-        export execdir=$execdir
-
+function spawnNormalThread(){
+set +a
+loadVars;
         while true; do
         sleep $threadTickTime
-        checkIsAlive=$(ps -e | grep -i java)
-                if [ "$checkIsAlive" == "" ]; then
+        tryn=$(ps -h -w -w | grep -i $lookFor)
+                if [ "$tryn" == "" ]; then
                         if [ ! -f "$lock" ]; then
                                 if [ ! -f "$filew" ]; then
                 startMinecraft &
                 threadCallRestartHandler &
-                #asyncCrashLoopDetection &
                                 fi
                         fi
                 fi
         done
 }
 
-mainLoop(){
-# Export things
- export lock=$lock
- export threadTickTime=$threadTickTime
- export threadSpacing=$threadSpacing
- export numThreads=$numThreads
- export filew=$filew
- export filex=$filex
- export filey=$filey
- export logfile=$logfile
-        export version=$version
-        export cfgfile=$cfgfile
-        export modfile=$modfile
-        export pack=$pack
-        export packid=$packid
-        export packidAppend=$packidAppend
-        export packidString=$packidString
-        export modload=$modload
- export restartSleepTime=$restartSleepTime
- export vanishSleepTime=$vanishSleepTime
- export whitelistSleepTime=$whitelistSleepTime
- export execdir=$execdir
-
+function mainLoop(){
+set -a
+loadVars;
 # Check for other watchdogs
 
 wcheck=$(ps -u minecraft | grep -c watchdog)
@@ -248,130 +249,63 @@ else
 daemonized="true"
 fi
 
-# Announce watchdog
-if [ "$wcheck" -lt "3" ]; then
+# Run instance check
+if [ "$isSingleInstance" == "true" ]; then
+if [ ! "$wcheck" -lt "3" ]; then
         rm $filew 2>/dev/null
-        if [ "$aggressiveThreading" == "true" ]; then
-        echo "(wcheck)" "Starting watchdog on "$packidAppend"..."
-        echo "(wcheck)" "SMT is enabled"
-        pmsg=" §2[ToastedWatchdog/§9SMT§2]§r §aStarted §amonitoring §r";msg=$pmsg$pack; broadcast
-      #  pmsg=" §2[ToastedWatchdog/§9SMT§2]§r §aver. ";msg=$pmsg$version; broadcast
-        else
-        echo "(wcheck)" "Starting watchdog on "$packidAppend"..."
-        pmsg=" §2[ToastedWatchdog]§r §aStarted §amonitoring §r";msg=$pmsg$pack; broadcast
-      # pmsg=" §2[ToastedWatchdog]§r §aver. ";msg=$pmsg$version; broadcast 
-        fi
-else
         echo "(wcheck)" "Another watchdog exists. Exiting with error code 1"
         exit 1
 
 fi
+fi
 
 # Load modular functions. Can be loaded from external files as well.
 . $modfile 2>/dev/null || echo "Can't find any external modules in" $modfile
+
 # Register functions to be loaded
         isModLoadingPhase="true"
-        export daemonized=$daemonized
-        export lock=$lock
-        export cfgfile=$cfgfile
-        export packid=$packid
-        export packidAppend=$packidAppend
-        export threadTickTime=$threadTickTime
-        export threadSpacing=$threadSpacing
-        export numThreads=$numThreads
-        export execdir=$execdir
-
+        echo ''
         . $modload 2>/dev/null || echo "Can't find module loading directives in" $modload
-        registerPackID;
+        . watchdog.setup.cfg 2>/dev/null
 # Complete module loading phase
         isModLoadingPhase="false"
-        sleep 1
-# Check if we use the old code or Aggressive Threading
-if [ "$aggressiveThreading" == "true" ]; then
-export threadTickTime=$threadTickTime
-export threadSpacing=$threadSpacing
-export numThreads=$numThreads
+        set -a
+
 # Spawn a master thread
 spawnMasterThread &
 sleep $threadSpacing
 # Spawn normal threads
 for ((n=0;n<$numThreads;n++)); do sleep $threadSpacing; spawnNormalThread &
 done
+
 # Change priority of the watchdog
-renice -n 21 -p $(pidof -x watchdog) > /dev/null 2>&1
-else
-# Load old watchdog code, if it's selected.
-# I know, it's a mess. Don't bother.
-while true; do
-        sleep 5
-        check=$(ps -e | grep -i java)
-        if [ "$check" == "" ]; then
-        # Minecraft is not running, reboot it!
-        if [ "$daemonized" != "true" ]; then
-        echo "(check)" Minecraft is not running.
-        fi
-        isRunning="no" # isRunning is here if you want to plug anything into this script
-        echo $isRunning > .wcld.com
-                if [ -f "$lock" ]; then
-                if [ "$daemonized" != "true" ]; then
-                echo Watchdog was locked by $lock, ignoring.
-                fi
-                else
-                crashDate=$(date)
-                if [ "$scheduledRestart" == "true" ]; then
-                echo "(log)" "Executing scheduled sequence on" "["$crashDate"], TW "$version >> $logfile
-                scheduledRestart="false"
-                export scheduledRestart=$scheduledRestart
-                else
-                echo "(log)" "Server stop detected @" "["$crashDate"], TW "$version >> $logfile
-                fi
-                stopMinecraft;
-                startMinecraft;
-                warnRestartOld &
-                fi
-        else
-        # Minecraft is running, check again!
-        if [ "$daemonized" != "true" ]; then
-        echo "(check)" Minecraft is running.
-        fi
-        isRunning="yes"
-        echo $isRunning > .wcld.com
-        fi
-done
-fi
+renice -n 20 -p $(pidof -x watchdog) > /dev/null 2>&1
+renice -n 21 -p $(pidof -x java) > /dev/null 2>&1
 }
 
 showHelp(){
-echo "ToastedWatchdog, a script by Fully Toasted, version" $version
+echo
+echo "Toasted Watchdog by Fully Toasted, package" $build
 echo "A watchdog that watches a Minecraft server, automating a few aspects of maintenance,"
 echo "and a shell toolkit for Fully Toasted's Minecraft servers."
-echo "Will log attempts to "$logfile
 echo
 echo "Usage:"
-echo "-d, start -> daemonize, run in as a service in the background."
-echo "-l, lock, pause -> lock, will lock the watchdog preventing it from doing anything."
-echo "-ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality."
-echo "-k, kill, stop ->  kills the daemon, stopping all of its functions."
-echo "-b [MESSAGE] -> broadcast a message to the server."
-echo "-h, help -> display this message."
-echo "schedule [restart/stop] [time in minutes] // (reason) -> schedules a server stop or restart"
-echo "-up, reload -> reloads the watchdog, applies updates."
+echo "  -d, start -> daemonize, run in as a service in the background."
+echo "  -l, lock, pause -> lock, will lock the watchdog preventing it from doing anything."
+echo "  -ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality."
+echo "  -k, kill, stop ->  kills the daemon, stopping all of its functions."
+echo "  -b [MESSAGE] -> broadcast a message to the server."
+echo "  schedule [restart/stop] [time in minutes] // (reason) -> schedules a server stop or restart"
 }
 
-killWatchdog(){
+function killWatchdog(){
+loadVars;
+set -a
 echo "Killing existing watchdog..."
 echo "Priming next watchdog!"
 rm $filew 2>/dev/null
 rm $filex 2>/dev/null
 rm $filey 2>/dev/null
-silenceString="-s"
-if [ "$exportedStwo" != "$silenceString" ]; then
-daemonized="true"
-else
-daemonized="false"
-echo "(debug)" "silenced"
-fi
-msg=" §4[ToastedWatchdog]§r Stopped!"; broadcast
 daemonized="false"
 killall -s 9 watchdog || echo "(2) Could not find a watchdog to kill."; exit 2
 killall -s 9 bash watchdog
@@ -382,29 +316,28 @@ rm $filew 2>/dev/null
 exit 0
 }
 
-daemonize(){
-echo "Creating a new daemon..."
-echo "Press Ctrl+C to detach it, or leave your session."
+function daemonize(){
+set -a
 export daemonized="true"
 daemonized="true"
-intro
 mainLoop & disown
 exit 0
 }
 
-lock(){
+function lock(){
 if [ -f "$lock" ]; then
-echo "(3) Watchdog already locked"; exit 3
+echo "[ERROR] Watchdog already locked"; exit 3
 else
 touch $lock
 fi
 }
 
-unlock(){
-rm $lock 2>/dev/null || echo "(4) Watchdog already unlocked"; exit 4
+function unlock(){
+rm $lock 2>/dev/null || echo "[ERROR] Watchdog already unlocked"; exit 4
 }
 
-broadcastMessage(){
+function broadcastMessage(){
+loadVars;
 daemonized="true"
 tag="  §6[Broadcast]§r"
 preMsg=$tag$exportedArgs
@@ -414,22 +347,30 @@ msg=$space$preMsg
 broadcast; daemonized="false"
 }
 
-broadcastInternal(){
+function broadcastInternal(){
+loadVars;
 daemonized="true"
+if [ "$isDebug" == "true" ]; then
+tag=" §5[ToastedWatchdog/DEBUG]§r "
+else
 tag=" §6[ToastedWatchdog]§r "
-msg=$tag$msgAppend; broadcast; daemonized="false"
+fi
+msg=$tag$msgAppend; broadcast; daemonized="false"; isDebug="false"
 }
 
-applyUpdate(){
+function applyUpdate(){
+loadVars;
 sleep 0.1
-msgAppend="Applying update..."; broadcastInternal
+msgAppend="Reloading the watchdog..."; broadcastInternal
 sleep 0.8
 . $execdir/watchdog -d &
 disown
 exit 0
 }
 
-scheduleManual(){
+function scheduleManual(){
+set -a
+loadVars;
 echo $exportedStwo
 case "$exportedStwo" in
         "stop"|"shutdown"|"close")
@@ -456,12 +397,11 @@ timeInSeconds=$(( $timeInSeconds + 1 ));
 timeIfGt15Min=$(( $timeInSeconds - 900 ));
 timeIfGt5Min=$(( $timeInSeconds - 300 ));
 timeIfGt1Min=$(( $timeInSeconds - 60  ));
-echo "Starting countdown. Do Ctrl+C to unlock your terminal. This will not stop."
-echo "Use watchdog -k -s to stop it. This will also kill the main watchdog."
+echo "Starting countdown. Do Ctrl+C to unlock your terminal."
 
 if [ "$isStop" == "true" ]; then
         msgAppend="Staff has scheduled a server stop for "$timeInMinutes" minutes from now."; export msgAppend=$msgAppend; broadcastInternal;
-        else
+else
         msgAppend="Staff has scheduled a server restart for "$timeInMinutes" minutes from now."; export msgAppend=$msgAppend; broadcastInternal;
 fi
 
@@ -470,11 +410,11 @@ msgAppend="Reason: "$reason; export msgAppend=$msgAppend; broadcastInternal;
 if [ "$timeIfGt15Min" -gt 0 ]; then
 alreadySlept="true"
 sleep $timeIfGt15Min
-export msgAppend='Server restarting in 15 minutes'; . $execdir/watchdog -i
+export msgAppend='Server stopping in 15 minutes'; . $execdir/watchdog -i
 sleep 600
-export msgAppend='Server restarting in 5 minutes'; . $execdir/watchdog -i
+export msgAppend='Server stopping in 5 minutes'; . $execdir/watchdog -i
 sleep 240
-export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
+export msgAppend='Server stopping in 1 minute'; . $execdir/watchdog -i
 sleep 60; didWait="true"
 fi 
 
@@ -505,11 +445,10 @@ if [ "$didWait" == "true" ]; then
         if [ "$isStop" == "true" ]; then
         # stopServer;
         touch $lock
-        . /home/minecraft/$packid/$packidAppend stop
-        waitForServer &
+        . /home/minecraft/$longPackID/$shortPackID stop
         else
         # rebootServer;
-        . /home/minecraft/$packid/$packidAppend stop
+        . /home/minecraft/$longPackID/$shortPackID stop
         rm $lock 2>/dev/null
         fi
 fi
@@ -518,27 +457,53 @@ alreadySlept="false"; didWait="false"
 exit 0
 }
 
-alexisbad(){
+function scheduleHandler(){
+set -a
+loadVars;
+echo "Input a reason to make this scheduled action, then press enter."
+echo "To cancel now, press Ctrl+C. This action cannot be cancelled anymore if you press ENTER."
+read reason
+scheduleManual &
+disown
+}
+
+function protectAdmin(){
+set -a
+loadVars;
+echo "[INFO] protectAdmin function running on "$shortPackID
 while true; do
-sleep 0.1
-# This is a joke.
-$execdir/watchdog -b Yago is bad
+if [ ! -f ".p" ]; then
+sleep 1.65
+command="execute "$adminName" ~ ~ ~ execute @e[name=!"$adminName",x=~,y=~,z=~,r=6] ~ ~ ~ summon lightning_bolt ~ ~ ~"; export command=$command; sendCommand;
+else
+exit 0
+fi
 done
 }
 
-scheduleHandler(){
-echo "Input a reason to make this scheduled action, then press enter."
-read reason
+function doTogglePA(){
+if [ ! -f ".v" ]; then
+touch .v
+echo "ProtectAdmin set to enabled"
+else
+touch .p
+sleep 2
+rm .p 2>/dev/null
+rm .v 2>/dev/null
+echo "ProtectAdmin set to disabled"
+fi
+}
 
-export reason=$reason
-scheduleManual &
-disown
+export > vars.dog
+
+loadVars(){
+source vars.dog
 }
 
 # Decide what to run
 case "$1" in 
         "-k"|"kill"|"stop")
-                killWatchdog
+               killWatchdog
                 ;;
         "-h"|"help")
                 showHelp
@@ -556,21 +521,27 @@ case "$1" in
                 applyUpdate
                 ;;
         "-b")
-                slimRegisterPackID; broadcastMessage
+                broadcastMessage
                 ;;
         "-i")
-                slimRegisterPackID; broadcastInternal
+                broadcastInternal
                 ;;
         "schedule")
-                registerPackID; scheduleHandler;
+                scheduleHandler;
                 ;;
         "yagoisbad")
-                yagoisbad;
+                echo "no u";
                 ;;
+        "-c")
+                sendCommand; exit 0
+                ;;
+        "-p")
+                protectAdmin & doTogglePA
+                ;;
+
         *)
-                echo "Unknown command"; showHelp; exit 1
+                echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
                 ;;
 esac
-
 
 
