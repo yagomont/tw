@@ -21,7 +21,7 @@ clear;
         echo "By continuing you agree to our terms: "'https://raw.githubusercontent.com/yagomont/toasted-watchdog/master/tos.txt'
         echo "Continue? (Y/n):"
         read cf; case $cf in
-                Y|y|""|" " ) echo "";;
+                Y|y|""|" "|yes ) echo "";;
                 *) exit 0;;
         esac
         echo "Syncing up with source... This may fail or be skipped safely."
@@ -69,6 +69,16 @@ clear;
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
         sleep 0.5
+            if [ -f "/home/$USER/.ttk" ]; then
+            echo "A old Shell Toolkit function file already exists. Remove it?"
+            echo "Answer n (no) here safely if you don't know what this means."
+            echo "(y/N):"
+            unset cf
+            read cf; case $cf in
+                N|n|""|" "|no ) echo -n "";;
+                *) rm /home/$USER/.ttk;;
+                     esac
+            fi
         echo "[1/3] RunAnywhere for "$packidAppend
         sleep 0.62
         echo "function" $packidAppend'(){' >> /home/$USER/.ttk
