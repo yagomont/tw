@@ -143,7 +143,6 @@ function startMinecraft(){
 
 function broadcast(){
 
-        loadVars;
                 if [ "$daemonized" == "true" ]; then
         echo "(debug/sent)"$msg
         tmux send -t $shortPackID say "$msg" ENTER
