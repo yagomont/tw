@@ -95,7 +95,7 @@ if [ "announcement" != "" ]; then
 fi
 
 sleep 500
-msgAppend="Don't forget to check out our new amazing, custom worldgen at /warp spawn3 ! Includes Biomes O' Plenty and RTG features, plus bugfixes."; broadcastInternal;
+#msgAppend="Don't forget to check out our new amazing, custom worldgen at /warp spawn3 ! Includes Biomes O' Plenty and RTG features, plus bugfixes."; broadcastInternal;
 done
 }
 
