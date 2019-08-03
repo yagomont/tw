@@ -27,7 +27,7 @@ clear;
         echo "Syncing up with source... This may fail or be skipped safely."
         sleep 1;
         rm -rf toasted-watchdog 2>/dev/null
-        git clone 2>/dev/null || echo "Updating failed."
+        git clone https://gitlab.com/FullyToasted/toasted-watchdog.git 2>/dev/null || echo "Updating failed."
         cp -r toasted-watchdog/* . 2>/dev/null
         sleep 0.8
         rm -rf toasted-watchdog 2>/dev/null
