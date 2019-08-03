@@ -470,7 +470,12 @@ export msgAppend='Server restarting in 1 minute'; . $execdir/watchdog -i
 sleep 60; didWait="true"
 fi
 else
-echo "Time was less than one minute. This is not supported."
+if [ "$timeInMinutes" == "0" ]; then
+echo "Executing restart immediately."
+didWait="true"
+else
+echo "This amount of time is not supported. Try 0 or >1 minutes."
+fi
 exit 1
 fi 
 
