@@ -34,7 +34,7 @@ done
 
 cacheLogins(){
 loadVars;
-echo "[INFO] cacheLogins module running on"$shortPackID
+echo "[INFO] cacheLogins module running on "$shortPackID
         while true; do
 sleep $cacheTime
 nline=$(tail -n 12 /home/minecraft/$longPackID/serverfiles/logs/latest.log | grep -i "Sent config to"  -)
