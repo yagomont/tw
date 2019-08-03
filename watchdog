@@ -124,6 +124,7 @@ fi
  filew=".w"
  filey=".y"
  filex=".x"
+ exportedArgs="$@"
  exportedSone=$1
  exportedStwo=$2
  exportedSthree=$3
@@ -353,6 +354,7 @@ preMsg=$(echo $preMsg | sed 's/\-b//g')
 space=" "
 msg=$space$preMsg
 broadcast; daemonized="false"
+unset msg;
 }
 
 function broadcastInternal(){
