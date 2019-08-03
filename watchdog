@@ -345,7 +345,7 @@ rm $lock 2>/dev/null || echo "[ERROR] Watchdog already unlocked"; exit 4
 }
 
 function broadcastMessage(){
-loadVars;
+
 daemonized="true"
 tag="  §6[Broadcast]§r"
 preMsg=$tag$exportedArgs
