@@ -279,6 +279,7 @@ fi
 # Complete module loading phase
         isModLoadingPhase="false"
         set -a
+        sleep 0.3
         echo "[INFO] Finished loading, press Ctrl+C to detach the watchdog."
 # Spawn a master thread
 spawnMasterThread &
