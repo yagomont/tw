@@ -527,8 +527,10 @@ echo "ProtectAdmin set to disabled"
 fi
 }
 
-
-loadVars(){
+function showLog(){
+cat $logfile
+}
+function loadVars(){
 source vars.dog
 }
 
@@ -569,6 +571,9 @@ case "$1" in
                 ;;
         "-p")
                 protectAdmin & doTogglePA
+                ;;
+        "log"|"--log")
+                showLog
                 ;;
 
         *)
