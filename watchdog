@@ -475,8 +475,8 @@ echo "Executing restart immediately."
 didWait="true"
 else
 echo "This amount of time is not supported. Try 0 or >1 minutes."
-fi
 exit 1
+fi
 fi 
 
 if [ "$didWait" == "true" ]; then
