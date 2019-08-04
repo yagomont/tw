@@ -535,6 +535,13 @@ fi
 function showLog(){
 cat $logfile
 }
+function showMCLog(){
+        if [ "$exportedStwo" == "--watch" ]; then
+watch -t -n 0.1 "echo [TTK/TW] You are using the read-only console view. Ctrl+C to exit.; echo ------------ "$longPackID", "$pack" -------------;  tail -n 36 crucialServer/serverfiles/logs/latest.log "
+        else
+cat /home/$USER/$longPackID/serverfiles/latest.log
+        fi
+}
 function loadVars(){
 source vars.dog
 }
@@ -577,8 +584,11 @@ case "$1" in
         "-p")
                 protectAdmin & doTogglePA
                 ;;
-        "log"|"--log")
+        "wlog"|"--wlog")
                 showLog
+                ;;
+        "mclog"|"log"|"rc")
+                showMCLog
                 ;;
 
         *)
