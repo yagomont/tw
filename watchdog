@@ -218,6 +218,7 @@ lookForCMD="$executable"
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 done
                 unset counter
+                tmux kill-session -t $shortPackID
                 echo "[INFO] Shutdown successful."; exit 0
         fi
 
@@ -227,7 +228,7 @@ lookForCMD="$executable"
                 sleep 0.5
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
-        tmux new-session -s $shortPackID ./"$executable"
+        tmux new-session -s $shortPackID 'cd /home/$USER/$longPackID/."$executable"'
         dated=$(date)
                 sleep 0.2
                         echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
