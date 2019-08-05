@@ -204,7 +204,7 @@ lookForCMD="$executable"
         command="stop"; sendCommand; sleep 1
         command="stop"; sendCommand;
         declare -i counter=0
-        nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
+        nl=$(ps -h -w -w | grep -v "tmux" -i $lookFor | wc -l);
                 while [ "$nl" != "0" ]; do
                 sleep 1; ((counter++));
                 if [ "$counter" -gt 35 ]; then
@@ -215,7 +215,7 @@ lookForCMD="$executable"
                         pkill -9 -x -f "$lookForCMD";
                         echo "[INFO] Server was killed."; break;
                 fi
-                nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
+                nl=$(ps -h -w -w | grep -v "tmux" -i $lookFor | wc -l);
                 done
                 unset counter
                 echo "[INFO] Shutdown successful."; exit 0
