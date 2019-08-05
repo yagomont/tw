@@ -335,7 +335,7 @@ set +a
 loadVars;
         while true; do
         sleep $masterThreadTickTime
-        try=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
+        try=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep")
                 if [ "$try" == "" ]; then
                 echo "false" > /tmp/toastedWatchdog_isRunning
                         if [ ! -f "$lock" ]; then
@@ -355,7 +355,7 @@ set +a
 loadVars;
         while true; do
         sleep $threadTickTime
-        tryn=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
+        tryn=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep")
                 if [ "$tryn" == "" ]; then
                         if [ ! -f "$lock" ]; then
                                 if [ ! -f "$filew" ]; then
