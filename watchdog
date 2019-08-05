@@ -692,7 +692,7 @@ case "$1" in
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
                 ;;
         "folder")
-                exit 0
+                cd $execdir; bash
                 ;;
         
          *)     
