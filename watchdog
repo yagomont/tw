@@ -66,7 +66,7 @@ clear;
         echo "Answer \"java\" if this pack is 1.7.10 or older, else answer \"openj9\", without quotes."
         read jarchoice
         case $jarchoice in
-                "openj9") seljar="$HOME/$longPackID/expJvm/current/bin/java";;
+                "openj9") seljar="$HOME$longPackID/expJvm/current/bin/java";;
                 "java") seljar="java";;
         esac 
 clear;
@@ -674,7 +674,7 @@ case "$1" in
                 unset act; act="shutdown"; MCManager
                 ;;
         "-v"|"listvars")
-                cat vars.dog
+                cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
                 ;;
         "folder")
                 exit 0
