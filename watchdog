@@ -68,8 +68,8 @@ clear;
         echo "Answer \"java\" if this pack is 1.7.10 or older, else answer \"openj9\", without quotes."
         read jarchoice
         case $jarchoice in
-                "openj9") seljar=""
-                "java") seljar=""
+                "openj9") seljar="$HOME/$longPackID/expJvm/current/bin/java";;
+                "java") seljar="java";;
         esac 
 clear;
         echo "Which jar is this server going to use? Usually this is a Forge or Thermos jar."
