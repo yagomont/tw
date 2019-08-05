@@ -233,6 +233,8 @@ lookForCMD="$executable"
                 if [ "$nl" == "0" ]; then
                 currentDir3=$(pwd)
                 cd /home/$USER/$longPackID/serverfiles/
+                chmod +x $javainstance 2>/dev/null
+                chmod +x $jarname || echo "[ERROR] Couldn't find Minecraft .jar, things will break."
         tmux new-session -d -s $shortPackID "$executable" 2>/dev/null || echo "[FATAL] Session start failed"
         dated=$(date)
                 cd $currentDir3
@@ -598,10 +600,13 @@ if [ "$didWait" == "true" ]; then
         if [ "$isStop" == "true" ]; then
         # stopServer;
         touch $lock
-        . /home/minecraft/$longPackID/$shortPackID stop
+        skip="true";
+        act="stop"; MCManager
         else
         # rebootServer;
-        . /home/minecraft/$longPackID/$shortPackID stop
+        rm $lock 2>/dev/null
+        skip="true";
+        act="stop"; MCManager
         rm $lock 2>/dev/null
         fi
 fi
