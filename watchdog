@@ -99,10 +99,12 @@ clear;
         echo "pack=""\"$pname\"" >> watchdog.setup.cfg
         iffolder="$ifolder/watchdog/"
         echo "fpid="\"$packid\" >> watchdog.setup.cfg
+        echo "longPackID=\"$fpid\"" >> watchdog.setup.cfg
+        echo "shortPackID=\"$packidAppend\"" >> watchdog.setup.cfg
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
         echo "jarname=\"$jarname\"" >> watchdog.setup.cfg
         echo "javainstance=\"$seljar\"" >> watchdog.setup.cfg
-        echo "ram'=\"$ram\"" >> watchdog.setup.cfg
+        echo "ram=\"$ram\"" >> watchdog.setup.cfg
         echo 'executable="$javainstance -Xmx$ram -Xms$ram -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=60 -XX:G1ReservePercent=18 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:+AlwaysPreTouch -XX:ParallelGCThreads=$numCores -XX:ConcGCThreads=$numCoresAdjusted -jar /home/minecraft/$longPackID/serverfiles/$jarname nogui"' >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
@@ -194,24 +196,21 @@ function MCManager(){
 set -a
         # Manage MC's startup/shutdown sequences
         # Performant alternative to LGSM
-        if [ "$act" == "" ]; then
-        "[ERROR] Found no information about this server. Attempting to recover."
 loadVars;
-lookForCMD="$executable"
-        fi
 lookForCMD="$executable"
         if [ "$act" == "stop" ]; then
         echo "[INFO] Sent shutdown signal to server. This may take up to 45 seconds to take effect."
         command="say stop"; sendCommand; sleep 1
         command="say stop"; sendCommand;
+        declare -i counter=0
         nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
                 while [ "$nl" != "0" ]; do
-                declare -i counter=0
                 sleep 1; ((counter++));
-                if [ "$counter" -gt 35 ]; then
+                if [ "$counter" -gt 5 ]; then
                         command="save-all flush"; sendCommand;
-                        msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."
+                        msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."; broadcastInternal;
                         sleep 6
+                        echo "$lookForCMD"
                         pkill -9 -x -f "$lookForCMD";
                         echo "[INFO] Server was killed."; break;
                 fi
@@ -385,7 +384,7 @@ fi
         isModLoadingPhase="false"
         set -a
         sleep 0.3
-	export > vars.dog
+        export > vars.dog
         echo "[INFO] Finished loading, press Ctrl+C to detach the watchdog."
 # Spawn a master thread
 spawnMasterThread &
@@ -692,12 +691,11 @@ case "$1" in
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
                 ;;
         "folder")
-                cd $execdir; bash
+                exit 0
                 ;;
         
          *)     
                 echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
                 ;;
 esac
-
 
