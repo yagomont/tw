@@ -148,6 +148,7 @@ clear;
         echo "You may now run the following commands from any place in the server terminal:"
         echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname" 
         echo "Edit the configuration file at "$iffolder"watchdog.cfg to this server's needs."
+        echo "Or, check out the commands watchdog-$iname config, and watchdog-$iname config-setup"
         . /home/$USER/.bashrc
         echo
         echo 'Press ENTER to reload your shell and exit.'
@@ -708,6 +709,12 @@ case "$1" in
                 ;;
         "cleanlogs")
                 logCleaner
+                ;;
+        "config-setup")
+                nano watchdog.setup.cfg
+                ;;
+        "config")
+                nano watchdog.cfg
                 ;;
         "folder")
                 cd $execdir; exit 0
