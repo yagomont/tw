@@ -63,6 +63,7 @@ clear;
         packidString="Server"
         packidAppend=$iname
         packid=$packidAppend$packidString
+        longPackID=$packid
         echo "Enter the full name of the pack as you'd like it to appear in the Watchdog's messages and prompts."
         echo "Pack name (ex: Enigmatica 2: Expert):"
         read pname
@@ -219,7 +220,7 @@ lookForCMD="$executable"
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 done
                 unset counter
-                tmux kill-session -t $shortPackID
+                tmux kill-session -t $shortPackID 2>/dev/null
                 echo "[INFO] Shutdown successful."; exit 0
         fi
 
@@ -229,8 +230,7 @@ lookForCMD="$executable"
                 sleep 0.5
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
-                chmod +x $jarfile 2>/dev/null
-        tmux new-session -s $shortPackID 'cd /home/$USER/$longPackID/."$executable"'
+        tmux new-session -s $shortPackID "$executable"
         dated=$(date)
                 sleep 0.2
                         echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
@@ -239,11 +239,22 @@ lookForCMD="$executable"
                 else
                         echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID",@ $dated" >> $logfile
                         echo "[ERROR] Server was already started."
+                        
                 fi
         exit 0
         fi
 }
 
+function accessConsole(){
+
+        echo "Do not use Ctrl + C to exit! It will close the game!"
+        echo "Use Ctrl + B, then press D instead."
+        echo
+        echo "[INFO] Launching MCManager console..."
+        sleep 3
+        tmux attach -t $shortPackID
+
+}
 
 function stopMinecraft(){
 unset act
@@ -719,7 +730,9 @@ case "$1" in
         "folder")
                 cd $execdir; exit 0
                 ;;
-        
+        "console"|"c")
+                accessConsole
+                ;;
          *)     
                 echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
                 ;;
