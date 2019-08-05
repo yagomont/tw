@@ -672,7 +672,7 @@ case "$1" in
         "restart"|"reboot")
                 echo "[INFO] Running MCManager twice."; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
-        "stop|"-st"|"shutdown")
+        "stop"|"-st"|"shutdown")
                 unset act; act="shutdown"; MCManager
                 ;;
         
