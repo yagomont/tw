@@ -33,11 +33,11 @@ clear;
         rm -rf toasted-watchdog 2>/dev/null
         sleep 0.2;
 clear;
-        echo "Select a Minecraft instance by pointing to its folder. (You are in: "$(pwd)")"
-        echo "This should be the same folder as the LGSM script is in."
+        echo "Select a Minecraft instance by pointing to its folder, from your home folder."
         echo "Run this script again if need install to another server instance, after you're done."
-        echo "Instance folder (ex: /home/minecraft/enigServer):"
+        echo "Instance folder (ex: enigServer):"
         read ifolder
+        ifolder=$HOME/$ifolder
         chmod +x * 2>/dev/null
         if [ -f "$ifolder/watchdog/watchdog" ]; then
             echo "A old watchdog installation was detected. Remove it first?"
@@ -64,6 +64,21 @@ clear;
         echo "Pack name (ex: Enigmatica 2: Expert):"
         read pname
 clear;
+        echo "Is this pack going to use regular Java or OpenJ9?"
+        echo "Answer \"java\" if this pack is 1.7.10 or older, else answer \"openj9\", without quotes."
+        read jarchoice
+        case $jarchoice in
+                "openj9") seljar=""
+                "java") seljar=""
+        esac 
+clear;
+        echo "Which jar is this server going to use? Usually this is a Forge or Thermos jar."
+        echo "List of jars found in the server directory:"
+        echo $(ls -a $ifolder/serverfiles | grep -i -F --color=always ".jar");
+        echo
+        echo "Answer with the exact, full name of the jar file, including the .jar extension. (you can copy, and paste)"
+        echo "eg. forge-x.xx.x-xx.xx.x.xxxx-universal.jar"
+        read $jarname
         echo "Installing new configuration... "
         dgen=$(date)
         touch watchdog.setup.cfg
@@ -77,6 +92,10 @@ clear;
         iffolder="$ifolder/watchdog/"
         echo "fpid="\"$packid\" >> watchdog.setup.cfg
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
+        echo "javainstance=\"$seljar\"" >> watchdog.setup.cfg
+        echo "ram'=\"$ram\"" >> watchdog.setup.cfg
+        echo "javainstance=\"$jvm\"" >> watchdog.setup.cfg
+        echo 'executable="$javainstance -Xmx$ram -Xms$ram -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=60 -XX:G1ReservePercent=18 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:+AlwaysPreTouch -XX:ParallelGCThreads=$numCores -XX:ConcGCThreads=$numCoresAdjusted -jar /home/minecraft/$longPackID/serverfiles/$jarname nogui"' >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
         sleep 0.5
@@ -158,8 +177,60 @@ shortPackID=$packidAppend
 longPackID=$fpid
 
 function startMinecraft(){
+unset act
+        act="start"; MCManager;
 
-         /home/minecraft/$longPackID/$shortPackID start &
+}
+
+
+function MCManager(){
+set -a
+        # Manage MC's startup/shutdown sequences
+        # Performant alternative to LGSM
+        if [ "$act" == "" ] && [ "$lookFor" == "" ]; then
+        "[ERROR] Found no information about this server. Attempting to recover."
+loadVars;
+lookForCMD="$executable"
+        fi
+        if [ "$act" == "stop" ]; then
+        echo "[INFO] Sent shutdown signal to server. This may take up to 45 seconds to take effect."
+        command="stop"; sendCommand; sleep 1
+        command="stop"; sendCommand;
+        nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
+                while [ "$nl" != "0" ]; do
+                declare -i counter=0
+                sleep 1; ((counter++));
+                if [ "$counter" -gt 35 ]; then
+                        command="save-all flush"; sendCommand;
+                        msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."
+                        sleep 6
+                        pkill -9 -x -f "$lookForCMD";
+                        echo "[INFO] Server was killed."; break;
+                fi
+                nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
+                done
+                unset counter
+                echo "[INFO] Shutdown successful."; exit 0
+        fi
+
+        if [ "$act" == "start" ]; then
+        echo "[INFO] Starting Minecraft server: $pack"
+        echo "[INFO] Using $build's MCManager"
+                sleep 1.6
+                if [ "$nl" == "0" ]; then
+        tmux new-session -s $shortPackID ./"$executable"
+        dated=$(date)
+                sleep 0.2
+                fi
+        echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
+        exit 0
+        fi
+}
+
+
+function stopMinecraft(){
+unset act
+        act="stop"; MCManager;
 
 }
 
@@ -533,13 +604,18 @@ fi
 }
 
 function showLog(){
-cat $logfile
-}
-function showMCLog(){
-        if [ "$exportedStwo" == "--watch" ]; then
-watch -t -n 0.1 "echo [TTK/TW] You are using the read-only console view. Ctrl+C to exit.; echo ------------ "$longPackID", "$pack" -------------;  tail -n 36 crucialServer/serverfiles/logs/latest.log "
+if [ "$exportedStwo" == "watch" ] && [ "$exportedStwo" == "-w" ]; then
+watch -t -n 0.1 "echo [TTK/TW] You are looking at the watchdog's logview. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 $logfile"
         else
-cat /home/$USER/$longPackID/serverfiles/latest.log
+cat $logfile
+        fi
+}
+
+function showMCLog(){
+        if [ "$exportedStwo" == "watch" ] && [ "$exportedStwo" == "-w" ]; then
+watch -t -n 0.1 "echo [TTK/TW] You are using the read-only console view. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 /home/$USER/$longPackID/serverfiles/logs/latest.log"
+        else
+cat /home/$USER/$longPackID/serverfiles/logs/latest.log
         fi
 }
 function loadVars(){
@@ -548,13 +624,13 @@ source vars.dog
 
 # Decide what to run
 case "$1" in 
-        "-k"|"kill"|"stop")
+        "-k"|"kill")
                killWatchdog
                 ;;
         "-h"|"help")
                 showHelp
                 ;;
-        "-d"|"daemon"|"start")
+        "-d"|"daemon")
                 daemonize
                 ;;
         "-l"|"lock"|"pause")
@@ -590,7 +666,15 @@ case "$1" in
         "mclog"|"log"|"rc")
                 showMCLog
                 ;;
-
+        "start"|"-su"|"spinup")
+                unset act; act="start"; MCManager
+                ;;
+        "restart"|"reboot")
+                echo "[INFO] Running MCManager twice."; unset act; act="stop"; MCManager; act="start"; MCManager;
+                ;;
+        "stop|"-st"|"shutdown")
+                unset act; act="shutdown"; MCManager
+                ;;
         *)
                 echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
                 ;;
