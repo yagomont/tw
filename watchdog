@@ -224,7 +224,7 @@ lookForCMD="$executable"
         if [ "$act" == "start" ]; then
         echo "[INFO] Starting Minecraft server: $pack"
         echo "[INFO] Using $build's MCManager"
-                sleep 1.6
+                sleep 0.5
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
         tmux new-session -s $shortPackID ./"$executable"
