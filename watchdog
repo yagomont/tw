@@ -174,6 +174,7 @@ fi
  exportedSone=$1
  exportedStwo=$2
  exportedSthree=$3
+ lookForCMD="$executable"
 # Fix permissions
 chmod +x $cfgfile 2>/dev/null
 chmod +x $modfile 2>/dev/null
@@ -193,15 +194,16 @@ function MCManager(){
 set -a
         # Manage MC's startup/shutdown sequences
         # Performant alternative to LGSM
-        if [ "$act" == "" ] && [ "$lookFor" == "" ]; then
+        if [ "$act" == "" ]; then
         "[ERROR] Found no information about this server. Attempting to recover."
 loadVars;
 lookForCMD="$executable"
         fi
+lookForCMD="$executable"
         if [ "$act" == "stop" ]; then
         echo "[INFO] Sent shutdown signal to server. This may take up to 45 seconds to take effect."
-        command="stop"; sendCommand; sleep 1
-        command="stop"; sendCommand;
+        command="say stop"; sendCommand; sleep 1
+        command="say stop"; sendCommand;
         nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
                 while [ "$nl" != "0" ]; do
                 declare -i counter=0
@@ -223,12 +225,17 @@ lookForCMD="$executable"
         echo "[INFO] Starting Minecraft server: $pack"
         echo "[INFO] Using $build's MCManager"
                 sleep 1.6
+                nl=$(ps -h -w -w | grep -i $lookFor | wc -l)
                 if [ "$nl" == "0" ]; then
         tmux new-session -s $shortPackID ./"$executable"
         dated=$(date)
                 sleep 0.2
+                        echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
+                        echo "[INFO] Started server "$shortPackID 
+                else
+                        echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID",@ $dated" >> $logfile
+                        echo "[ERROR] Server was already started."
                 fi
-        echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
         exit 0
         fi
 }
@@ -610,7 +617,7 @@ fi
 }
 
 function showLog(){
-if [ "$exportedStwo" == "watch" ] && [ "$exportedStwo" == "-w" ]; then
+if [ "$exportedStwo" == "watch" ]; then
 watch -t -n 0.1 "echo [TTK/TW] You are looking at the watchdog's logview. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 $logfile"
         else
 cat $logfile
@@ -618,7 +625,7 @@ cat $logfile
 }
 
 function showMCLog(){
-        if [ "$exportedStwo" == "watch" ] && [ "$exportedStwo" == "-w" ]; then
+        if [ "$exportedStwo" == "watch" ]; then
 watch -t -n 0.1 "echo [TTK/TW] You are using the read-only console view. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 /home/$USER/$longPackID/serverfiles/logs/latest.log"
         else
 cat /home/$USER/$longPackID/serverfiles/logs/latest.log
