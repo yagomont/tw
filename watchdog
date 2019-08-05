@@ -121,20 +121,20 @@ clear;
                      esac
             fi
         echo "[1/3] RunAnywhere for "$packidAppend
-        echo "function" $packidAppend'(){' >> /home/$USER/.ttk
-        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk
-        echo "cd $ifolder" >> /home/$USER/.ttk
-        echo './'"$iname"' $@' >>/home/$USER/.ttk
-        echo "cd "'$currentDir' >> /home/$USER/.ttk
-        echo '}' >> /home/$USER/.ttk
+        echo "function" $packidAppend'(){' >> /home/$USER/.ttk;
+        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
+        echo "cd $iffolder" >> /home/$USER/.ttk;
+        echo './'"watchdog"' $@' >>/home/$USER/.ttk;
+        echo "cd "'$currentDir' >> /home/$USER/.ttk;
+        echo '}' >> /home/$USER/.ttk;
         echo "[2/3] RunAnywhere for watchdog-"$packidAppend;
         # Sorry about the copy-paste here :x
-                echo "function" "watchdog-"$packidAppend'(){' >> /home/$USER/.ttk;
-                        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
-                                echo "cd $iffolder" >> /home/$USER/.ttk;
-                                        echo './'"watchdog"' $@' >>/home/$USER/.ttk;
-                                                echo "cd "'$currentDir' >> /home/$USER/.ttk;
-                                                        echo '}' >> /home/$USER/.ttk;
+        echo "function" "watchdog-"$packidAppend'(){' >> /home/$USER/.ttk;
+        echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
+        echo "cd $iffolder" >> /home/$USER/.ttk;
+        echo './'"watchdog"' $@' >>/home/$USER/.ttk;
+        echo "cd "'$currentDir' >> /home/$USER/.ttk;
+        echo '}' >> /home/$USER/.ttk;
         echo "[3/3] RunAnywhere for ttk-"$packidAppend" ";
         sleep 0.1
         echo "alias ttk-$iname=watchdog-$iname" >> /home/$USER/.ttk;
@@ -220,6 +220,7 @@ lookForCMD="$executable"
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 done
                 unset counter
+                unset skip
                 tmux kill-session -t $shortPackID 2>/dev/null
                 echo "[INFO] Shutdown successful."; exit 0
         fi
@@ -423,13 +424,18 @@ echo "Toasted Watchdog by Fully Toasted, package" $build
 echo "A watchdog that watches a Minecraft server, automating a few aspects of maintenance,"
 echo "and a shell toolkit for Fully Toasted's Minecraft servers."
 echo
-echo "Usage:"
+echo "Toasted Watchdog | Usage:"
 echo "  -d, start -> daemonize, run in as a service in the background."
 echo "  -l, lock, pause -> lock, will lock the watchdog preventing it from doing anything."
 echo "  -ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality."
 echo "  -k, kill, stop ->  kills the daemon, stopping all of its functions."
 echo "  -b [MESSAGE] -> broadcast a message to the server."
 echo "  schedule [restart/stop] [time in minutes] // (reason) -> schedules a server stop or restart"
+echo "MCManager | Usage:"
+echo "  start -> starts the Minecraft server instance"
+echo "  stop -> stops the Minecraft server instance"
+echo "  c, console -> attempts to connect to the remote console of this instance"
+echo "  restart -> restarts the server"
 }
 
 function killWatchdog(){
@@ -679,6 +685,7 @@ if [ "$skip" != "true" ]; then
         echo "To unlock the watchdog: \"watchdog -ul\", to lock it: \"watchdog -l\" "
         fi
 fi
+echo -n ""
 }
 
 # Decide what to run
@@ -729,7 +736,7 @@ case "$1" in
                 unset act; act="start"; MCManager
                 ;;
         "restart"|"reboot")
-                echo "[INFO] Running MCManager twice."; unset act; act="stop"; MCManager; act="start"; MCManager;
+                echo "[INFO] Running MCManager twice."; skip="true"; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
         "stop"|"-st"|"shutdown")
                 stopPrompt; unset act; act="stop"; MCManager
