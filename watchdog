@@ -619,6 +619,18 @@ echo "ProtectAdmin set to disabled"
 fi
 }
 
+logCleaner(){
+        echo "This will delete all logs and crash reports of the $shortPackID instance!"
+        echo "Press Enter to confirm, Ctrl+C to cancel."
+        read confirm
+        echo ""
+        echo "[INFO] Removing log files"
+        rm -v /home/$USER/$longPackID/serverfiles/logs/*
+        echo "[INFO] Removing crash reports"
+        rm -v /home/$USER/$longPackID/serverfiles/crash-reports/*
+
+}
+
 function showLog(){
 if [ "$exportedStwo" == "watch" ]; then
 watch -t -n 0.1 "echo [TTK/TW] You are looking at the watchdog's logview. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 $logfile"
