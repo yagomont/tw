@@ -25,13 +25,10 @@ clear;
                 *) exit 0;;
         esac
         echo "Syncing up with source... This may fail or be skipped safely."
-        sleep 1;
         rm -rf toasted-watchdog 2>/dev/null
         git clone https://gitlab.com/FullyToasted/toasted-watchdog.git 2>/dev/null || echo "Updating failed."
         cp -r toasted-watchdog/* . 2>/dev/null
-        sleep 0.8
         rm -rf toasted-watchdog 2>/dev/null
-        sleep 0.2;
 clear;
         echo "Select a Minecraft instance by pointing to its folder, from your home folder."
         echo "Run this script again if need install to another server instance, after you're done."
