@@ -675,8 +675,8 @@ case "$1" in
         "stop|"-st"|"shutdown")
                 unset act; act="shutdown"; MCManager
                 ;;
-        *)
-                echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
+        
+         *)     echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
                 ;;
 esac
 
