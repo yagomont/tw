@@ -53,7 +53,7 @@ clear;
         echo "Copying files... "
         mkdir $ifolder/watchdog 2>/dev/null
         touch firstrun
-        cp -r * $ifolder/watchdog || echo 'Failed to copy files.' || exit 1 
+        cp -r * $ifolder/watchdog || echo 'Failed to copy files. Ignore this if you are just updating a existing watchdog.' || exit 1 
        # echo 
        # echo "Enter the name of this Minecraft instance. This is important to get right."
        # echo "Instance name (ex: enig) (ex2: revel):"
