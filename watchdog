@@ -48,8 +48,8 @@ clear;
                 Y|y|""|" "|yes ) rm $ifolder/watchdog/*;;
                 *) echo -n "";;
                      esac
-                     clear;
             fi
+            clear;
         echo "Copying files... "
         mkdir $ifolder/watchdog 2>/dev/null
         touch firstrun
