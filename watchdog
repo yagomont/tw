@@ -635,6 +635,11 @@ done
 }
 
 function doTogglePA(){
+        if [ "$exportedStwo" != "" ]; then
+                adminName=$exportedStwo
+                export adminName=$exportedStwo
+                echo "[INFO] Set admin's name as $adminName"
+        fi
 if [ ! -f ".v" ]; then
 touch .v
 echo "ProtectAdmin set to enabled"
@@ -755,7 +760,7 @@ case "$1" in
                 sendCommand; exit 0
                 ;;
         "-p")
-                protectAdmin & doTogglePA
+                doTogglePA; protectAdmin &
                 ;;
         "wlog"|"--wlog")
                 showLog
