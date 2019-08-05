@@ -678,11 +678,15 @@ if [ "$skip" != "true" ]; then
         echo "Pressing enter will continue anyway. Press Ctrl + C to cancel the server stop."
         echo
         echo "To unlock the watchdog: \"watchdog -ul\", to lock it: \"watchdog -l\" "
+        read x
+        unset x
         else
         echo "The watchdog is unlocked. The server will start itself up immediately after you stop it."
         echo "Pressing enter will continue anyway. Press Ctrl + C to cancel the server stop."
         echo
         echo "To unlock the watchdog: \"watchdog -ul\", to lock it: \"watchdog -l\" "
+        read x
+        unset x
         fi
 fi
 echo -n ""
