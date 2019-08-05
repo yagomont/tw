@@ -44,7 +44,7 @@ clear;
             echo "Keeping the old one may introduce problems. Say y (yes) here if you are unsure."
             echo "(Y/n):"
             unset cf
-            read cf; case $cf in
+            read ci; case $ci in
                 Y|y|""|" "|yes ) rm $ifolder/watchdog/*;;
                 *) echo -n "";;
                      esac
