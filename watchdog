@@ -40,7 +40,6 @@ clear;
             echo "A old watchdog installation was detected. Remove it first?"
             echo "Keeping the old one may introduce problems. Say y (yes) here if you are unsure."
             echo "(Y/n):"
-            unset cf
             read ci; case $ci in
                 Y|y|""|" "|yes ) rm $ifolder/watchdog/*;;
                 *) echo -n "";;
