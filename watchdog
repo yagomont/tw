@@ -232,6 +232,7 @@ lookForCMD="$executable"
                 sleep 0.2
                         echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
                         echo "[INFO] Started server "$shortPackID 
+                        sleep 0.1
                 else
                         echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID",@ $dated" >> $logfile
                         echo "[ERROR] Server was already started."
