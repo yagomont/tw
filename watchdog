@@ -686,7 +686,7 @@ case "$1" in
                 echo "[INFO] Running MCManager twice."; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
         "stop"|"-st"|"shutdown")
-                unset act; act="shutdown"; MCManager
+                unset act; act="stop"; MCManager
                 ;;
         "-v"|"listvars")
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
