@@ -72,7 +72,7 @@ clear;
         echo "Answer \"java\" if this pack is 1.7.10 or older, else answer \"openj9\", without quotes."
         read jarchoice
         case $jarchoice in
-                "openj9") seljar="$HOME$longPackID/expJvm/current/bin/java";;
+                "openj9") seljar="/home/$USER/$longPackID/expJvm/current/bin/java";;
                 "java") seljar="java";;
         esac 
 clear;
@@ -230,8 +230,11 @@ lookForCMD="$executable"
                 sleep 0.5
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
-        tmux new-session -s $shortPackID "$executable"
+                currentDir3=$(pwd)
+                cd /home/$USER/$longPackID/serverfiles/
+        tmux new-session -s $shortPackID "$executable" 2>/dev/null
         dated=$(date)
+                cd $currentDir3
                 sleep 0.2
                         echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
                         echo "[INFO] Started server "$shortPackID 
