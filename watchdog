@@ -200,13 +200,14 @@ loadVars;
 lookForCMD="$executable"
         if [ "$act" == "stop" ]; then
         echo "[INFO] Sent shutdown signal to server. This may take up to 45 seconds to take effect."
-        command="say stop"; sendCommand; sleep 1
-        command="say stop"; sendCommand;
+        echo "[INFO] Using $build's MCManager"
+        command="stop"; sendCommand; sleep 1
+        command="stop"; sendCommand;
         declare -i counter=0
         nl=$(ps -h -w -w | grep -i $lookFor | wc -l);
                 while [ "$nl" != "0" ]; do
                 sleep 1; ((counter++));
-                if [ "$counter" -gt 5 ]; then
+                if [ "$counter" -gt 35 ]; then
                         command="save-all flush"; sendCommand;
                         msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."; broadcastInternal;
                         sleep 6
