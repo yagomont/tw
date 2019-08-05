@@ -149,6 +149,7 @@ clear;
         echo "You may now run the following commands from any place in the server terminal:"
         echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname" 
         echo "Edit the configuration file at "$iffolder"watchdog.cfg to this server's needs."
+        echo "Or, check out the commands watchdog-$iname config, and watchdog-$iname config-setup"
         . /home/$USER/.bashrc
         echo
         echo 'Press ENTER to reload your shell and exit.'
@@ -630,6 +631,18 @@ echo "ProtectAdmin set to disabled"
 fi
 }
 
+logCleaner(){
+        echo "This will delete all logs and crash reports of the $shortPackID instance!"
+        echo "Press Enter to confirm, Ctrl+C to cancel."
+        read confirm
+        echo ""
+        echo "[INFO] Removing log files"
+        rm -v /home/$USER/$longPackID/serverfiles/logs/*
+        echo "[INFO] Removing crash reports"
+        rm -v /home/$USER/$longPackID/serverfiles/crash-reports/*
+
+}
+
 function showLog(){
 if [ "$exportedStwo" == "watch" ]; then
 watch -t -n 0.1 "echo [TTK/TW] You are looking at the watchdog's logview. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 $logfile"
@@ -705,8 +718,17 @@ case "$1" in
         "-v"|"listvars")
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
                 ;;
+        "cleanlogs")
+                logCleaner
+                ;;
+        "config-setup")
+                nano watchdog.setup.cfg
+                ;;
+        "config")
+                nano watchdog.cfg
+                ;;
         "folder")
-                exit 0
+                cd $execdir; exit 0
                 ;;
         "console"|"c")
                 accessConsole
