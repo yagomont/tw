@@ -81,7 +81,7 @@ clear;
         echo
         echo "Answer with the exact, full name of the jar file, including the .jar extension. (you can copy, and paste)"
         echo "eg. forge-x.xx.x-xx.xx.x.xxxx-universal.jar"
-        read $jarname
+        read jarname
 clear;
         echo "How much memory will the server be able to use?"
         echo "eg. \"2048M\" for 2GBs of heap size. You can also directly use \"G\", such as in \"2G\""
@@ -625,7 +625,7 @@ cat /home/$USER/$longPackID/serverfiles/logs/latest.log
         fi
 }
 function loadVars(){
-source vars.dog
+source vars.dog 2>/dev/null
 }
 
 # Decide what to run
