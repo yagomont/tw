@@ -58,7 +58,7 @@ clear;
        # echo "Instance name (ex: enig) (ex2: revel):"
        # read iname
        suffix="Server"
-       iname=${cf%"$suffix"}
+       iname=${cf%"$suffix"}; echo $iname; sleep 3
         packidString="Server"
         packidAppend=$iname
         packid=$packidAppend$packidString
