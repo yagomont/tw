@@ -13,6 +13,9 @@ execdir=$(pwd)
 cfgfile=$execdir"/watchdog.cfg"
 modload=$cfgfile
 
+# Get system info
+numCores=$(nproc)
+numCoresAdjusted=$(( numCores - 1 ))
 # Run the install script if firstrun doesn't exist
 function firstrun(){
 clear;
@@ -45,6 +48,7 @@ clear;
                 Y|y|""|" "|yes ) rm $ifolder/watchdog/*;;
                 *) echo -n "";;
                      esac
+                     clear;
             fi
         echo "Copying files... "
         mkdir $ifolder/watchdog 2>/dev/null
@@ -82,6 +86,7 @@ clear;
         echo "How much memory will the server be able to use?"
         echo "eg. \"2048M\" for 2GBs of heap size. You can also directly use \"G\", such as in \"2G\""
         read ram
+clear;
         echo "Installing new configuration... "
         dgen=$(date)
         touch watchdog.setup.cfg
@@ -100,7 +105,7 @@ clear;
         echo 'executable="$javainstance -Xmx$ram -Xms$ram -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=60 -XX:G1ReservePercent=18 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:+AlwaysPreTouch -XX:ParallelGCThreads=$numCores -XX:ConcGCThreads=$numCoresAdjusted -jar /home/minecraft/$longPackID/serverfiles/$jarname nogui"' >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
-        sleep 0.5
+        sleep 0.3
             if [ -f "/home/$USER/.ttk" ]; then
             echo "A old Shell Toolkit function file already exists. Remove it?"
             echo "Answer n (no) here safely if you don't know what this means."
@@ -112,7 +117,6 @@ clear;
                      esac
             fi
         echo "[1/3] RunAnywhere for "$packidAppend
-        sleep 0.62
         echo "function" $packidAppend'(){' >> /home/$USER/.ttk
         echo "currentDir="'$(pwd)' >> /home/$USER/.ttk
         echo "cd $ifolder" >> /home/$USER/.ttk
@@ -120,7 +124,6 @@ clear;
         echo "cd "'$currentDir' >> /home/$USER/.ttk
         echo '}' >> /home/$USER/.ttk
         echo "[2/3] RunAnywhere for watchdog-"$packidAppend;
-        sleep 0.3
         # Sorry about the copy-paste here :x
                 echo "function" "watchdog-"$packidAppend'(){' >> /home/$USER/.ttk;
                         echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
@@ -129,7 +132,7 @@ clear;
                                                 echo "cd "'$currentDir' >> /home/$USER/.ttk;
                                                         echo '}' >> /home/$USER/.ttk;
         echo "[3/3] RunAnywhere for ttk-"$packidAppend" ";
-        sleep 0.6
+        sleep 0.1
         echo "alias ttk-$iname=watchdog-$iname" >> /home/$USER/.ttk;
         duplicateCheck=$(cat /home/$USER/.bashrc | grep -i "Added by ToastedWatchdog")
                 if [ "$duplicateCheck" == "" ]; then
