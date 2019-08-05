@@ -53,10 +53,12 @@ clear;
         mkdir $ifolder/watchdog 2>/dev/null
         touch firstrun
         cp -r * $ifolder/watchdog || echo 'Failed to copy files.' || exit 1 
-        echo 
-        echo "Enter the name of this Minecraft instance. This is important to get right."
-        echo "Instance name (ex: enig) (ex2: revel):"
-        read iname
+       # echo 
+       # echo "Enter the name of this Minecraft instance. This is important to get right."
+       # echo "Instance name (ex: enig) (ex2: revel):"
+       # read iname
+       suffix="Server"
+       iname=${cf%"$suffix"}
         packidString="Server"
         packidAppend=$iname
         packid=$packidAppend$packidString
