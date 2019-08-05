@@ -661,7 +661,12 @@ logCleaner(){
 
 function showLog(){
 if [ "$exportedStwo" == "watch" ]; then
-watch -t -n 0.1 "echo [TTK/TW] You are looking at the watchdog's logview. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 $logfile"
+        fe ()
+        {
+        echo '[TTK/TW] You are using the dynamic log view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n 36 $logfile
+        }
+        export -f fe
+        watch -t -n 0.1 -x bash -c fe
         else
 cat $logfile
         fi
@@ -669,7 +674,12 @@ cat $logfile
 
 function showMCLog(){
         if [ "$exportedStwo" == "watch" ]; then
-watch -t -n 0.1 "echo [TTK/TW] You are using the read-only console view. Ctrl+C to exit.; echo "------------" "$longPackID", "$pack" "-------------";  tail -n 36 /home/$USER/$longPackID/serverfiles/logs/latest.log"
+        fe ()
+        {
+        echo '[TTK/TW] You are using the read-only console view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n 36 /home/"$USER"/"$longPackID"/serverfiles/logs/latest.log
+        }
+        export -f fe
+        watch -t -n 0.1 -x bash -c fe
         else
 cat /home/$USER/$longPackID/serverfiles/logs/latest.log
         fi
@@ -697,6 +707,16 @@ if [ "$skip" != "true" ]; then
         fi
 fi
 echo -n ""
+}
+
+rmLocks(){
+
+        rm $lock 
+        rm $filew
+        rm $filex
+        rm $filey
+        rm .wdr
+
 }
 
 # Decide what to run
@@ -763,6 +783,9 @@ case "$1" in
                 ;;
         "config")
                 nano watchdog.cfg
+                ;;
+        "rmlocks")
+                echo "[INFO] Removing all locks..."; rmLocks 2>/dev/null;
                 ;;
         "folder")
                 cd $execdir; exit 0
