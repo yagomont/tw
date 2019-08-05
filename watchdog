@@ -228,6 +228,7 @@ lookForCMD="$executable"
                 sleep 0.5
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
+                chmod +x $jarfile 2>/dev/null
         tmux new-session -s $shortPackID 'cd /home/$USER/$longPackID/."$executable"'
         dated=$(date)
                 sleep 0.2
@@ -693,8 +694,11 @@ case "$1" in
         "-v"|"listvars")
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
                 ;;
+        "cleanlogs")
+                logCleaner
+                ;;
         "folder")
-                exit 0
+                cd $execdir; exit 0
                 ;;
         
          *)     
