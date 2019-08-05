@@ -100,6 +100,7 @@ clear;
         iffolder="$ifolder/watchdog/"
         echo "fpid="\"$packid\" >> watchdog.setup.cfg
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
+        echo "jarname=\"$jarname\"" >> watchdog.setup.cfg
         echo "javainstance=\"$seljar\"" >> watchdog.setup.cfg
         echo "ram'=\"$ram\"" >> watchdog.setup.cfg
         echo 'executable="$javainstance -Xmx$ram -Xms$ram -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=60 -XX:G1ReservePercent=18 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:+AlwaysPreTouch -XX:ParallelGCThreads=$numCores -XX:ConcGCThreads=$numCoresAdjusted -jar /home/minecraft/$longPackID/serverfiles/$jarname nogui"' >> watchdog.setup.cfg
