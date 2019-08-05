@@ -232,7 +232,7 @@ lookForCMD="$executable"
                 if [ "$nl" == "0" ]; then
                 currentDir3=$(pwd)
                 cd /home/$USER/$longPackID/serverfiles/
-        tmux new-session -A -D -s $shortPackID "$executable" 2>/dev/null || echo "[INFO] Session start failed"
+        tmux new-session -d -s $shortPackID "$executable" 2>/dev/null || echo "[FATAL] Session start failed"
         dated=$(date)
                 cd $currentDir3
                 sleep 0.2
@@ -254,7 +254,7 @@ function accessConsole(){
         echo "Use Ctrl + B, then press D instead."
         echo
         echo "[INFO] Launching MCManager console..."
-        sleep 3
+        sleep 2
         tmux attach -t $shortPackID
 
 }
