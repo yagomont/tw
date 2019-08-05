@@ -665,6 +665,22 @@ function loadVars(){
 source vars.dog 2>/dev/null
 }
 
+stopPrompt(){
+if [ "$skip" != "true" ]; then
+        if [ -f "$lock" ]; then
+        echo "The watchdog is locked. The server will not start back up automatically after you stop it."
+        echo "Pressing enter will continue anyway. Press Ctrl + C to cancel the server stop."
+        echo
+        echo "To unlock the watchdog: \"watchdog -ul\", to lock it: \"watchdog -l\" "
+        else
+        echo "The watchdog is unlocked. The server will start itself up immediately after you stop it."
+        echo "Pressing enter will continue anyway. Press Ctrl + C to cancel the server stop."
+        echo
+        echo "To unlock the watchdog: \"watchdog -ul\", to lock it: \"watchdog -l\" "
+        fi
+fi
+}
+
 # Decide what to run
 case "$1" in 
         "-k"|"kill")
@@ -716,10 +732,10 @@ case "$1" in
                 echo "[INFO] Running MCManager twice."; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
         "stop"|"-st"|"shutdown")
-                unset act; act="stop"; MCManager
+                stopPrompt; unset act; act="stop"; MCManager
                 ;;
         "-v"|"listvars")
-                cat vars.dog || echo "[ERROR] The watchdog needs to be run once to generate a variable list.";
+                cat vars.dog || echo "[ERROR] The watchdog needs to be run once with "-d" to generate a variable list.";
                 ;;
         "cleanlogs")
                 logCleaner
