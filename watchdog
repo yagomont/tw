@@ -37,6 +37,7 @@ clear;
         ifolder=$HOME/$ifolderpre
         chmod +x * 2>/dev/null
         if [ -f "$ifolder/watchdog/watchdog" ]; then
+        clear;
             echo "A old watchdog installation was detected. Remove it first?"
             echo "Keeping the old one may introduce problems. Say y (yes) here if you are unsure."
             echo "(Y/n):"
@@ -77,6 +78,10 @@ clear;
         echo "Answer with the exact, full name of the jar file, including the .jar extension. (you can copy, and paste)"
         echo "eg. forge-x.xx.x-xx.xx.x.xxxx-universal.jar"
         read $jarname
+clear;
+        echo "How much memory will the server be able to use?"
+        echo "eg. \"2048M\" for 2GBs of heap size. You can also directly use \"G\", such as in \"2G\""
+        read ram
         echo "Installing new configuration... "
         dgen=$(date)
         touch watchdog.setup.cfg
@@ -92,7 +97,6 @@ clear;
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
         echo "javainstance=\"$seljar\"" >> watchdog.setup.cfg
         echo "ram'=\"$ram\"" >> watchdog.setup.cfg
-        echo "javainstance=\"$jvm\"" >> watchdog.setup.cfg
         echo 'executable="$javainstance -Xmx$ram -Xms$ram -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=60 -XX:G1ReservePercent=18 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M -XX:+AlwaysPreTouch -XX:ParallelGCThreads=$numCores -XX:ConcGCThreads=$numCoresAdjusted -jar /home/minecraft/$longPackID/serverfiles/$jarname nogui"' >> watchdog.setup.cfg
         cp -r watchdog.setup.cfg $iffolder
         echo "Installing the Fully Toasted Shell Toolkit (TTK)..."
