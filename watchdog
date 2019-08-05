@@ -99,7 +99,7 @@ clear;
         echo "pack=""\"$pname\"" >> watchdog.setup.cfg
         iffolder="$ifolder/watchdog/"
         echo "fpid="\"$packid\" >> watchdog.setup.cfg
-        echo "longPackID=\"$fpid\"" >> watchdog.setup.cfg
+        echo "longPackID=\"$packid\"" >> watchdog.setup.cfg
         echo "shortPackID=\"$packidAppend\"" >> watchdog.setup.cfg
         echo "lookFor=$packid/serverfiles" >> watchdog.setup.cfg
         echo "jarname=\"$jarname\"" >> watchdog.setup.cfg
