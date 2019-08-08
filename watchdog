@@ -22,7 +22,8 @@ clonefile=".cloned"
         undothings ()
         {
                 rm $clonefile 2>/dev/null
-                rm firstrun
+                rm firstrun 2>/dev/null
+                exit 0
         }
 
         trap undothings INT
@@ -39,7 +40,7 @@ clear;
         rm -rf toasted-watchdog 2>/dev/null
         
         echo "Syncing up with source... This may fail or be skipped safely."
-        git clone https://gitlab.com/FullyToasted/toasted-watchdog.git 2>/dev/null ; touch $clonefile
+        git clone https://gitlab.com/FullyToasted/toasted-watchdog.git ; touch $clonefile
                 cp -r toasted-watchdog/* . 2>/dev/null
                 rm -rf toasted-watchdog 2>/dev/null
                 . $execdir/watchdog
