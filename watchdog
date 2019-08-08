@@ -514,11 +514,12 @@ show_spinner "$!"
 }
 
 function showConsoleWarning(){
-        define scounter=0
-while [ "$scounter" -lt 3 ]; do
-  sleep 1
+        declare -i scounter=0
+while [ "$scounter" -lt 1 ]; do
+  sleep 0.8
   ((scounter++))
-  echo -n "<< Press CTRL + B, then D to quit. Do NOT press Ctrl + C. >>"
+ echo -ne "\e[5m \e[92m << Press CTRL + B, then D to quit. Do NOT press Ctrl + C. >> \e[0m"
+ tmux send -t $shortPackID ENTER 2>/dev/null
 done
         exit 0
 }
