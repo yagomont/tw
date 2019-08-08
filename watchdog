@@ -40,6 +40,7 @@ clear;
         rm -rf toasted-watchdog 2>/dev/null
         
         echo "Syncing up with source... This may fail or be skipped safely."
+        echo
         git clone https://gitlab.com/FullyToasted/toasted-watchdog.git ; touch $clonefile
                 cp -r toasted-watchdog/* . 2>/dev/null
                 rm -rf toasted-watchdog 2>/dev/null
