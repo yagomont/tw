@@ -164,6 +164,7 @@ clear;
             fi
             dontAdd="false"
         rm firstrun 2>/dev/null
+        rm $clonefile 2>/dev/null
         rm watchdog.setup.cfg 2>/dev/null
 clear;
         echo "Installation is finished."
