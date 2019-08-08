@@ -161,15 +161,15 @@ clear;
                 if [ "$duplicateCheck" == "" ]; then
         echo ". /home/$USER/.ttk # Added by ToastedWatchdog" >> /home/$USER/.bashrc;
                 fi
+                  echo "You may now run the following commands from any place in the server terminal:"
+                  echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname"
             fi
             dontAdd="false"
         rm firstrun 2>/dev/null
         rm $clonefile 2>/dev/null
         rm watchdog.setup.cfg 2>/dev/null
 clear;
-        echo "Installation is finished."
-        echo "You may now run the following commands from any place in the server terminal:"
-        echo "watchdog-$iname"; echo "ttk-$iname"; echo "$iname" 
+        echo "Installation is finished." 
         echo "Edit the configuration file at "$iffolder"watchdog.cfg to this server's needs."
         echo "Or, check out the commands watchdog-$iname config, and watchdog-$iname config-setup"
         . /home/$USER/.bashrc
