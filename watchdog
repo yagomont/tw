@@ -225,11 +225,11 @@ lookForCMD="$executable"
         nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 while [ "$nl" != "0" ]; do
                 sleep 1; ((counter++));
-                if [ "$counter" -gt 30 ]; then
-                        if [ "$countedto30" != "true" ]; then
+                if [ "$counter" -gt 20 ]; then
+                        if [ "$countedto20" != "true" ]; then
                         command="save-all flush"; sendCommand;
                         msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."; broadcastInternal;
-                        countedto30="true"
+                        countedto20="true"
                         fi
                 fi
                 if [ "$counter" -gt 50 ]; then
