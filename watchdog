@@ -129,13 +129,16 @@ clear;
             if [ -f "/home/$USER/.ttk" ]; then
             echo "A old Shell Toolkit function file already exists. Remove it?"
             echo "Answer n (no) here safely if you don't know what this means."
-            echo "(y/N):"
+            echo "Answer d (don't add), to not add an entry."
+            echo "(y/N/d):"
             unset cf
             read cf; case $cf in
                 N|n|""|" "|no ) echo -n "";;
+                d|D ) dontAdd=true ;;
                 *) rm /home/$USER/.ttk;;
                      esac
             fi
+            if [ "$dontAdd" != "true" ]; then
         echo "[1/3] RunAnywhere for "$packidAppend
         echo "function" $packidAppend'(){' >> /home/$USER/.ttk;
         echo "currentDir="'$(pwd)' >> /home/$USER/.ttk;
@@ -158,6 +161,8 @@ clear;
                 if [ "$duplicateCheck" == "" ]; then
         echo ". /home/$USER/.ttk # Added by ToastedWatchdog" >> /home/$USER/.bashrc;
                 fi
+            fi
+            dontAdd="false"
         rm firstrun 2>/dev/null
         rm watchdog.setup.cfg 2>/dev/null
 clear;
