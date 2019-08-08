@@ -241,6 +241,7 @@ lookForCMD="$executable"
                 done
                 unset counter
                 unset skip
+                rm $clonefile 2>/dev/null
                 tmux kill-session -t $shortPackID 2>/dev/null
                 echo "[INFO] Shutdown successful."; exit 0
         fi
