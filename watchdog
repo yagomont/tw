@@ -224,7 +224,7 @@ lookForCMD="$executable"
                         if [ "$countedto30" != "true" ]; then
                         command="save-all flush"; sendCommand;
                         msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."; broadcastInternal;
-                        countedto20="true"
+                        countedto30="true"
                         fi
                 fi
                 if [ "$counter" -gt 50 ]; then
@@ -243,7 +243,7 @@ lookForCMD="$executable"
         if [ "$act" == "start" ]; then
         echo "[INFO] Starting Minecraft server: $pack"
         echo "[INFO] Using $build's MCManager"
-                sleep 0.5
+                sleep 0.1
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l)
                 if [ "$nl" == "0" ]; then
                 currentDir3=$(pwd)
@@ -489,7 +489,7 @@ show_spinner ()
 {
 
   local -r pid="${1}"
-  local -r delay='0.75'
+  local -r delay='0.3'
   local spinstr='\|/-'
   local temp
   while ps a | awk '{print $1}' | grep -q "${pid}"; do
@@ -553,9 +553,9 @@ function broadcastInternal(){
 loadVars;
 daemonized="true"
 if [ "$isDebug" == "true" ]; then
-tag=" §5[ToastedWatchdog/DEBUG]§r "
+tag=" §6[ToastedWatchdog/DEBUG]§r "
 else
-tag=" §6[ToastedWatchdog]§r "
+tag=" §5[ToastedWatchdog]§r "
 fi
 msg=$tag$msgAppend; broadcast; daemonized="false"; isDebug="false"
 }
