@@ -562,7 +562,7 @@ daemonized="true"
 if [ "$isDebug" == "true" ]; then
 tag=" §6[ToastedWatchdog/DEBUG]§r "
 else
-tag=" §rand[ToastedWatchdog]§r "
+tag=" §$rand[ToastedWatchdog]§r "
 fi
 msg=$tag$msgAppend; broadcast; daemonized="false"; isDebug="false"
 }
