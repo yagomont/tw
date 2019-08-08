@@ -274,11 +274,9 @@ lookForCMD="$executable"
 
 function accessConsole(){
 
-        echo "Do not use Ctrl + C to exit! It will close the game!"
-        echo "Use Ctrl + B, then press D instead."
-        echo
+
         echo "[INFO] Launching MCManager console..."
-        sleep 2
+        showConsoleWarning &
         tmux attach -t $shortPackID
 
 }
