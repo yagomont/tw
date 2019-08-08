@@ -18,7 +18,9 @@ numCores=$(nproc)
 numCoresAdjusted=$(( numCores - 1 ))
 # Run the install script if firstrun doesn't exist
 function firstrun(){
+        clonefile=".cloned"
 clear;
+        if [ ! -f "$clonefile" ]; then
         echo "You are running ToastedWatchdog by Fully Toasted for the first time."
         echo "This wizard will walk you through the installation of Toasted Watchdog and the Fully Toasted Shell Toolkit (TTK)."
         echo "By continuing you agree to our terms: "'https://raw.githubusercontent.com/yagomont/toasted-watchdog/master/tos.txt'
@@ -27,11 +29,16 @@ clear;
                 Y|y|""|" "|yes ) echo "";;
                 *) exit 0;;
         esac
+        rm -rf toasted-watchdog 2>/dev/null
+        
         echo "Syncing up with source... This may fail or be skipped safely."
-        rm -rf toasted-watchdog 2>/dev/null
-        git clone https://gitlab.com/FullyToasted/toasted-watchdog.git 2>/dev/null || echo "Updating failed."
-        cp -r toasted-watchdog/* . 2>/dev/null
-        rm -rf toasted-watchdog 2>/dev/null
+        git clone https://gitlab.com/FullyToasted/toasted-watchdog.git 2>/dev/null ; touch $clonefile
+                cp -r toasted-watchdog/* . 2>/dev/null
+                rm -rf toasted-watchdog 2>/dev/null
+                . $execdir/watchdog
+                rm $clonefile 2>/dev/null
+                exit 0
+        fi
 clear;
         echo "Select a Minecraft instance by pointing to its folder, from your home folder."
         echo "Run this script again if need install to another server instance, after you're done."
