@@ -18,7 +18,14 @@ numCores=$(nproc)
 numCoresAdjusted=$(( numCores - 1 ))
 # Run the install script if firstrun doesn't exist
 function firstrun(){
-        clonefile=".cloned"
+clonefile=".cloned"
+        undothings ()
+        {
+                rm $clonefile 2>/dev/null
+                rm firstrun
+        }
+
+        trap undothings INT
 clear;
         if [ ! -f "$clonefile" ]; then
         echo "You are running ToastedWatchdog by Fully Toasted for the first time."
