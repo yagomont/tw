@@ -557,7 +557,7 @@ unset msg;
 
 function broadcastInternal(){
 loadVars;
-rand=$(shuf -i 1-9)
+rand=$(shuf -i 1-9 -n 1)
 daemonized="true"
 if [ "$isDebug" == "true" ]; then
 tag=" §6[ToastedWatchdog/DEBUG]§r "
