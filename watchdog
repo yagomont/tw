@@ -8,7 +8,7 @@
 # */
 set -a
 # Do not edit unless making a commit
-build="TTK 1.0"
+build="TTK 1.1"
 execdir=$(pwd)
 cfgfile=$execdir"/watchdog.cfg"
 modload=$cfgfile
@@ -78,7 +78,7 @@ clear;
 clear;
         echo "Which jar is this server going to use? Usually this is a Forge or Thermos jar."
         echo "List of jars found in the server directory:"
-        echo $(ls -a $ifolder/serverfiles | grep -i -F --color=always ".jar");
+        echo $(ls -a $ifolder/serverfiles | grep -i -F --color=always ".jar" | grep -v --color=always ".log");
         echo
         echo "Answer with the exact, full name of the jar file, including the .jar extension. (you can copy, and paste)"
         echo "eg. forge-x.xx.x-xx.xx.x.xxxx-universal.jar"
@@ -201,7 +201,7 @@ set -a
 loadVars;
 lookForCMD="$executable"
         if [ "$act" == "stop" ]; then
-        echo "[INFO] Sent shutdown signal to server. This may take up to 45 seconds to take effect."
+        echo "[INFO] Sent shutdown signal to server. This may take up to one minute to take effect."
         echo "[INFO] Using $build's MCManager"
         command="stop"; sendCommand; sleep 1
         command="stop"; sendCommand;
@@ -209,13 +209,17 @@ lookForCMD="$executable"
         nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 while [ "$nl" != "0" ]; do
                 sleep 1; ((counter++));
-                if [ "$counter" -gt 35 ]; then
+                if [ "$counter" -gt 30 ]; then
+                        if [ "$countedto30" != "true" ]; then
                         command="save-all flush"; sendCommand;
                         msgAppend="Flushing all chunks to disk! Server will be killed soon if it doesn't stop."; broadcastInternal;
-                        sleep 6
-                        echo "$lookForCMD"
-                        pkill -9 -x -f "$lookForCMD";
-                        echo "[INFO] Server was killed."; break;
+                        countedto20="true"
+                        fi
+                fi
+                if [ "$counter" -gt 50 ]; then
+                pkill -9 -x -f "$lookForCMD";
+                echo "[INFO] Server was killed."; break;
+                countedto20="false"
                 fi
                 nl=$(ps -h -w -w | grep -v "tmux" | grep -i $lookFor | grep -v "grep" | wc -l);
                 done
@@ -239,11 +243,11 @@ lookForCMD="$executable"
         dated=$(date)
                 cd $currentDir3
                 sleep 0.2
-                        echo "[LOG/MCManager] Started tmux server @ "$shortPackID",@ $dated" >> $logfile
+                        echo "[LOG/MCManager] Started tmux server @ "$shortPackID", @ $dated" >> $logfile
                         echo "[INFO] Started server "$shortPackID 
                         sleep 0.1
                 else
-                        echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID",@ $dated" >> $logfile
+                        echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID", @ $dated" >> $logfile
                         echo "[ERROR] Server was already started."
                         
                 fi
@@ -427,19 +431,21 @@ echo "A watchdog that watches a Minecraft server, automating a few aspects of ma
 echo "and a shell toolkit for Fully Toasted's Minecraft servers."
 echo
 echo "Toasted Watchdog Commands | Usage:"
-echo "  -d, daemonize -> daemonize, run in as a service in the background"
-echo "  -l, lock, pause -> lock, will lock the watchdog preventing it from doing anything"
-echo "  -ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality"
-echo "  -k, kill ->  kills the daemon, stopping all of its functions"
-echo "  -b [MESSAGE] -> broadcast a message to the server"
-echo "  -p -> toggles the ProtectAdmin module to shoot lightning bolts at things near you. Configure your username with the \"config\" option."
+echo "  d, -d, daemonize -> daemonize, run in as a service in the background"
+echo "  l, -l, lock, pause -> lock, will lock the watchdog preventing it from doing anything"
+echo "  ul, -ul, unlock, resume -> unlock, will unlock the daemon, restoring functionality"
+echo "  k, -k, kill ->  kills the daemon, stopping all of its functions"
+echo "  b, -b [MESSAGE] -> broadcast a message to the server"
+echo "  p, -p -> toggles the ProtectAdmin module to shoot lightning bolts at things near you. Configure your username with the \"config\" option."
 echo "  config -> opens the watchdog's configuration file for edits"
 echo "  config-setup -> opens the watchdog's secondary configuration file for edits"
+echo "  config-file [FILE] -> edits a file of this server instance (serverfiles folder)"
 echo "  schedule [restart/stop] [time in minutes] // (reason) -> schedules a server stop or restart"
-echo "  cleanlogs -> cleans up this Minecraft instance's logs"
+echo "  cleanlogs -> cleans up this Minecraft instance's logs, and the watchdog's logs as well."
 echo "  mclog (watch) -> shows the latest Minecraft log. If you use \"mclog watch\" it will open the console in read-only mode. It doesn't have a warning or waiting time and is good for a quick peek."
 echo "  wlog (watch) -> shows the latest Toasted Watchdog log. \"wlog watch\" will constantly update your view of the log."
 echo "  yagoisbad -> No, you are."
+echo
 echo "MCManager Commands | Usage:"
 echo "  start -> starts the Minecraft server instance"
 echo "  stop -> stops the Minecraft server instance"
@@ -463,6 +469,41 @@ rm $lock 2>/dev/null
 rm $filew 2>/dev/null
 
 exit 0
+}
+
+function spinner(){
+# Ripped off of stackoverflow
+# Quits if its child dies
+show_spinner ()
+{
+
+  local -r pid="${1}"
+  local -r delay='0.75'
+  local spinstr='\|/-'
+  local temp
+  while ps a | awk '{print $1}' | grep -q "${pid}"; do
+    temp="${spinstr#?}"
+    printf " [%c]  " "${spinstr}"
+    spinstr=${temp}${spinstr%"${temp}"}
+    sleep "${delay}"
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+
+}
+
+("$@") &
+show_spinner "$!"
+}
+
+function showConsoleWarning(){
+        define scounter=0
+while [ "$scounter" -lt 3 ]; do
+  sleep 1
+  ((scounter++))
+  echo -n "<< Press CTRL + B, then D to quit. Do NOT press Ctrl + C. >>"
+done
+        exit 0
 }
 
 function daemonize(){
@@ -729,27 +770,34 @@ rmLocks(){
 
 }
 
+serverConfigHandler(){
+
+        file=$exportedStwo
+        nano /home/$USER/$longPackID/serverfiles/$file
+
+}
+
 # Decide what to run
 case "$1" in 
-        "-k"|"kill")
+        "-k"|"kill"|"k")
                killWatchdog
                 ;;
-        "-h"|"help")
+        "-h"|"help"|"h")
                 showHelp
                 ;;
-        "-d"|"daemon")
+        "-d"|"daemon"|"d")
                 daemonize
                 ;;
-        "-l"|"lock"|"pause")
+        "-l"|"lock"|"pause"|"l")
                 lock
                 ;;
-        "-ul"|"unlock"|"resume")
+        "-ul"|"unlock"|"resume"|"ul")
                 unlock
                 ;;
         "-up"|"update"|"reload")
                 applyUpdate
                 ;;
-        "-b")
+        "-b"|"b")
                 broadcastMessage
                 ;;
         "-i")
@@ -764,7 +812,7 @@ case "$1" in
         "-c")
                 sendCommand; exit 0
                 ;;
-        "-p")
+        "-p"|"p")
                 doTogglePA; protectAdmin &
                 ;;
         "wlog"|"--wlog")
@@ -774,13 +822,13 @@ case "$1" in
                 showMCLog
                 ;;
         "start"|"-su"|"spinup")
-                unset act; act="start"; MCManager
+                unset act; act="start"; spinner MCManager
                 ;;
         "restart"|"reboot")
                 echo "[INFO] Running MCManager twice."; skip="true"; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
         "stop"|"-st"|"shutdown")
-                stopPrompt; unset act; act="stop"; MCManager
+                stopPrompt; unset act; act="stop"; spinner MCManager
                 ;;
         "-v"|"listvars")
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once with "-d" to generate a variable list.";
@@ -793,6 +841,9 @@ case "$1" in
                 ;;
         "config")
                 nano watchdog.cfg
+                ;;
+        "config-file")
+                serverConfigHandler
                 ;;
         "rmlocks")
                 echo "[INFO] Removing all locks..."; rmLocks 2>/dev/null;
