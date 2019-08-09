@@ -85,9 +85,9 @@ loadVars;
 echo "[INFO] announceHandler module running on" $shortPackID
 while true; do
 sleep 2800
+msgAppend="You are playing $pack on Fully Toasted."; broadcastInternal;
 msgAppend="Is the server lagging or having problems?"; broadcastInternal;
 msgAppend="If it is, tag our @Staff on Discord!"; broadcastInternal;
-
 if [ "$announcement" != "" ]; then
 
                         load=$(cat /proc/loadavg)
