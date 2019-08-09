@@ -240,8 +240,6 @@ function threadingHandler ()
         echo "Master Tick Time -> $masterThreadTickTime sec" >> .threadinfo
         echo "Thread Spacing -> $threadSpacing sec" >> .threadinfo
         echo "Thread Count -> $numThreads" >> .threadinfo
-        clear
-        cat .threadinfo
 
                 threadTickTimeArray[$thCounter]=$threadTickTime
                 threadSpacingArray[$thCounter]=$threadSpacing
