@@ -10,6 +10,7 @@
 # If you can't fit something you need here, look into editing the watchdog itself!
 # Functions must be referenced in watchdog.cfg to actually run.
 
+        . watchdog.setup.cfg 2>/dev/null
         set -a
 
 serverRestartScheduler(){
