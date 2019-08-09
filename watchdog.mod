@@ -71,7 +71,7 @@ loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
 saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
-msgAppend="Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
+msgAppend=" §d[Save] Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
 command="save-all"; export command=$command; sendCommand;
 
         if [ "$doFullGC" == "true" ]; then
@@ -86,8 +86,9 @@ announceHandler(){
         source watchdog.setup.cfg
 echo "[INFO] announceHandler module running on" $shortPackID
 while true; do
-sleep 2800
+sleep 2760
 msgAppend="You are playing $pack on Fully Toasted."; broadcastInternal;
+sleep 20
 msgAppend="Is the server lagging or having problems?"; broadcastInternal;
 msgAppend="If it is, tag our @Staff on Discord!"; broadcastInternal;
 if [ "$announcement" != "" ]; then
@@ -101,7 +102,7 @@ if [ "$announcement" != "" ]; then
 
 fi
 
-sleep 500
+sleep 100
 done
 }
 
