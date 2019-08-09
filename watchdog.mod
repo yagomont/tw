@@ -76,6 +76,7 @@ echo "[INFO] saveHandler module running on" $shortPackID
 saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
 msgAppend="§d<Save> Saving world and cleaning memory. §7This §7might §7lag."; broadcastInternal;
+: > /var/mail/$USER # Clean mail
 command="save-all"; export command=$command; sendCommand;
 
         if [ "$doFullGC" == "true" ]; then
