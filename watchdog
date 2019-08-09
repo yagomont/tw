@@ -507,7 +507,9 @@ fi
         set -a
         sleep 0.3
         export > vars.dog
-        echo "[INFO] Finished loading, press Ctrl+C to detach the watchdog."
+        echo "[INFO] Finished loading modules"
+        touch .threadinfo
+        echo -n "[INFO] Spawning threaded watchdog"; spinner spinnerDummy
 # Spawn a master thread
 spawnMasterThread &
 sleep $threadSpacing
@@ -518,7 +520,11 @@ done
 # Change priority of the watchdog
 renice -n 21 -p $(pidof -x watchdog) > /dev/null 2>&1
 renice -n 20 -p $(pidof -x java) > /dev/null 2>&1
+rm .threadinfo 2>/dev/null
+echo ''
 echo "[INFO] Applied priority values"
+echo "[INFO/DONE] Finished. The watchdog was detached from your session."
+exit 0
 }
 
 showHelp(){
