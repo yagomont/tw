@@ -101,7 +101,7 @@ if [ "$announcement" != "" ]; then
                         usemem=$(bc <<< "scale=2; $memtotal - $usemem");
                         totalmem=$(bc <<< "scale=2; $memtotal * 1" );
         sleep $announcementDelay
-        msgAppend=${!announcement}; broadcastInternal
+        msgAppend=$announcement; broadcastInternal
 
 fi
 
