@@ -100,7 +100,7 @@ if [ "$announcement" != "" ]; then
                         usemem=$(awk '/MemFree/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
                         usemem=$(bc <<< "scale=2; $memtotal - $usemem");
                         totalmem=$(bc <<< "scale=2; $memtotal * 1" );
-
+        announcement="$announcement"
         sleep $announcementDelay
         msgAppend="$announcement"; broadcastInternal
 
