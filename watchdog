@@ -270,11 +270,7 @@ function spinnerDummy(){
 
 function expandAnnoucement(){
 
-                                load=$(cat /proc/loadavg)
-                        for loadnow in $load
-                        do
-                        break;
-                        done
+                        loadnow=$(echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')])
                         memtotal=$(awk '/MemTotal/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
                         usemem=$(awk '/MemFree/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
                         usemem=$(bc <<< "scale=2; $memtotal - $usemem");
@@ -313,6 +309,8 @@ set -a
 loadVars;
 lookForCMD="$executable"
         if [ "$act" == "stop" ]; then
+        touch .threadinfo
+        spinner spinnerDummy &
         echo "[INFO] Sent shutdown signal to server. This may take up to one minute to take effect."
         echo "[INFO] Using $build's MCManager"
         command="stop"; sendCommand; sleep 1
@@ -339,10 +337,13 @@ lookForCMD="$executable"
                 unset skip
                 rm $clonefile 2>/dev/null
                 tmux kill-session -t $shortPackID 2>/dev/null
+                rm .threadinfo 2>/dev/null
                 echo "[INFO] Shutdown successful."; exit 0
         fi
 
         if [ "$act" == "start" ]; then
+        touch .threadinfo
+        spinner spinnerDummy &
         echo "[INFO] Starting Minecraft server: $pack"
         echo "[INFO] Using $build's MCManager"
                 sleep 0.1
@@ -352,16 +353,15 @@ lookForCMD="$executable"
                 cd /home/$USER/$longPackID/serverfiles/
                 chmod +x $javainstance 2>/dev/null
                 chmod +x $jarname || echo "[ERROR] Couldn't find Minecraft .jar, things will break."
-        tmux new-session -d -s $shortPackID "$executable" 2>/dev/null || echo "[FATAL] Session start failed"
+        tmux new-session -d -s $shortPackID "$executable" 2>/dev/null || echo "[ERROR] Server already exists!"
         dated=$(date)
                 cd $currentDir3
-                sleep 0.2
                         echo "[LOG/MCManager] Started tmux server @ "$shortPackID", @ $dated" >> $logfile
                         echo "[INFO] Started server "$shortPackID 
-                        sleep 0.1
+                        rm .threadinfo 2>/dev/null
                 else
                         echo "[LOG/MCManager] Failed to start tmux server @ "$shortPackID", @ $dated" >> $logfile
-                        echo "[ERROR] Server was already started."
+                        rm .threadinfo 2>/dev/null
                         
                 fi
         exit 0
@@ -386,11 +386,9 @@ unset act
 function broadcast(){
 
                 if [ "$daemonized" == "true" ]; then
-        echo " * [SEND] * "$msg
+        echo "[SENT] "$msg
         tmux send -t $shortPackID say "$msg" ENTER
         unset msg
-                else 
-        echo " * [SEND/SILENCED] * "$msg
                 fi
 
 }
@@ -663,9 +661,9 @@ loadVars;
 rand="5"
 daemonized="true"
 if [ "$isDebug" == "true" ]; then
-tag=" §6[ToastedWatchdog/DEBUG]§r "
+tag=" §d[TW/DEBUG]§r "
 else
-tag=" §$rand[ToastedWatchdog]§r "
+tag=" §$rand[TW]§r "
 fi
 msg=$tag$msgAppend; broadcast; daemonized="false"; isDebug="false"
 }
@@ -945,13 +943,13 @@ case "$1" in
                 showMCLog
                 ;;
         "start"|"-su"|"spinup")
-                unset act; act="start"; spinner MCManager
+                unset act; act="start"; MCManager
                 ;;
         "restart"|"reboot")
                 echo "[INFO] Running MCManager twice."; skip="true"; unset act; act="stop"; MCManager; act="start"; MCManager;
                 ;;
         "stop"|"-st"|"shutdown")
-                stopPrompt; unset act; act="stop"; spinner MCManager
+                stopPrompt; unset act; act="stop"; MCManager
                 ;;
         "-v"|"listvars")
                 cat vars.dog || echo "[ERROR] The watchdog needs to be run once with "-d" to generate a variable list.";

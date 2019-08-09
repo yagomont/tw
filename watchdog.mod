@@ -15,7 +15,7 @@
 
 serverRestartScheduler(){
 loadVars;
-# Schedule a restart for 5am EST
+# Schedule a restart for 5am EDT
 echo "[INFO] serverRestartScheduler module running on "$shortPackID
 execdir=$(pwd)
 export execdir=$execdir
@@ -25,7 +25,7 @@ atcheck=$(atq | wc -l)
 #if [ "$atcheck" -eq "0" ]; then
 if [ ! -f ".wdr" ]; then
 if [ ! -f $lock ]; then
-echo 'bash watchdog.rbs' | at 4:45 -M
+echo 'bash watchdog.rbs' | at 8:45UTC -M || echo 'bash watchdog.rbs' | at 4:45 -M
 touch .wdr
 fi
 fi
@@ -71,13 +71,14 @@ loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
 saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
-sleep $saveHandlerTime
 msgAppend="Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
 command="save-all"; export command=$command; sendCommand;
 
         if [ "$doFullGC" == "true" ]; then
         command="pregen utils gc"; export command=$command; sendCommand;
+        echo "[INFO] saveHandler: Enabled GC mode."
         fi
+        sleep $saveHandlerTime
 done
 }
 
@@ -90,13 +91,7 @@ msgAppend="You are playing $pack on Fully Toasted."; broadcastInternal;
 msgAppend="Is the server lagging or having problems?"; broadcastInternal;
 msgAppend="If it is, tag our @Staff on Discord!"; broadcastInternal;
 if [ "$announcement" != "" ]; then
-
-                        load=$(cat /proc/loadavg)
-                        for loadnow in $load
-                        do
-                        sleep 0.1
-                        break;
-                        done
+                        loadnow=$(echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')])
                         memtotal=$(awk '/MemTotal/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
                         usemem=$(awk '/MemFree/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
                         usemem=$(bc <<< "scale=2; $memtotal - $usemem");
@@ -107,7 +102,6 @@ if [ "$announcement" != "" ]; then
 fi
 
 sleep 500
-#msgAppend="Don't forget to check out our new amazing, custom worldgen at /warp spawn3 ! Includes Biomes O' Plenty and RTG features, plus bugfixes."; broadcastInternal;
 done
 }
 
