@@ -26,9 +26,9 @@ atcheck=$(atq | wc -l)
 if [ ! -f ".wdr" ]; then
 if [ ! -f $lock ]; then
 echo 'bash watchdog.rbs' | at 8:45UTC -M || echo 'bash watchdog.rbs' | at 4:45 -M
-msgAppend="§d<Scheduler> Scheduled a restart to 5:00 EDT."; broadcastInternal;
+msgAppend="§d<Scheduler>§r Scheduled a restart to 5:00 EDT."; broadcastInternal;
 sleep 120
-msgAppend="§d<Save> Flushing all queued saves to disk. §7This §7will §7lag."; broadcastInternal;
+msgAppend="§d<Save>§r Flushing all queued saves to disk. §7This §7will §7lag."; broadcastInternal;
 command="save-all flush"; export command=$command; sendCommand;
 touch .wdr
 fi
@@ -75,7 +75,7 @@ loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
 saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
-msgAppend="§d<Save> Saving world and cleaning memory. §7This §7might §7lag."; broadcastInternal;
+msgAppend="§d<Save>§r Saving world and cleaning memory. §7This §7might §7lag."; broadcastInternal;
 : > /var/mail/$USER # Clean mail
 command="save-all"; export command=$command; sendCommand;
 
