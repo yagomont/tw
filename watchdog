@@ -524,7 +524,7 @@ renice -n 20 -p $(pidof -x java) > /dev/null 2>&1
 rm .threadinfo 2>/dev/null
 echo ''
 echo "[INFO] Applied priority values"
-echo "[INFO/DONE] Finished. The watchdog was detached from your session."
+echo "[INFO] Finished. Press Ctrl+C to detach the watchdog from your session."
 exit 0
 }
 
