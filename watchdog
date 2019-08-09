@@ -386,7 +386,7 @@ unset act
 function broadcast(){
 
                 if [ "$daemonized" == "true" ]; then
-        echo "[SENT] "$msg
+        echo "[SENT]"$msg
         tmux send -t $shortPackID say "$msg" ENTER
         unset msg
                 fi
