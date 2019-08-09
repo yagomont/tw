@@ -71,7 +71,7 @@ loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
 saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
-msgAppend=" §d[Save] Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
+msgAppend="§d[Save] Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
 command="save-all"; export command=$command; sendCommand;
 
         if [ "$doFullGC" == "true" ]; then
