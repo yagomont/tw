@@ -198,8 +198,9 @@ function threadingHandler ()
 
                 unset thCounter
                 declare -i thCounter=0
+                touch .threadinfo
                 spinner spinnerDummy &
-                echo "[INFO] Calculating timings. Please wait."
+                echo -n "[INFO] Calculating timings. Please wait."
 
                 threadTickTimeArray=()
                 threadSpacingArray=()
@@ -253,7 +254,7 @@ done
 
                 threadSpacing=$(bc <<< "scale=3; ${threadSpacingArray[1]} + ${threadSpacingArray[2]} + ${threadSpacingArray[3]} + ${threadSpacingArray[0]} / 4")
                 threadTickTime=$(bc <<< "scale=3; ${threadTickTimeArray[1]} + ${threadTickTimeArray[2]} + ${threadTickTimeArray[3]} + ${threadTickTimeArray[0]} / 4")
-
+        echo ""
         echo "[INFO] Calculated timings (tt/mt/ts/tc) -> $threadTickTime | $masterThreadTickTime | $threadSpacing | $numThreads"
 }
 
@@ -261,7 +262,7 @@ function spinnerDummy(){
 
         decoy=".threadinfo"
         while [ -f "$decoy" ]; do
-                sleep 0.1
+                sleep 0.05
         done
 
 }
