@@ -509,7 +509,8 @@ fi
         export > vars.dog
         echo "[INFO] Finished loading modules"
         touch .threadinfo
-        echo -n "[INFO] Spawning threaded watchdog"; spinner spinnerDummy
+        echo -n "[INFO] Spawning threaded watchdog"; 
+        spinner spinnerDummy &
 # Spawn a master thread
 spawnMasterThread &
 sleep $threadSpacing
