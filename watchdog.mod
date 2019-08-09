@@ -82,6 +82,7 @@ done
 }
 
 announceHandler(){
+        source watchdog.setup.cfg
 echo "[INFO] announceHandler module running on" $shortPackID
 while true; do
 sleep 2800
