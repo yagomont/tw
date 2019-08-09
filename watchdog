@@ -80,6 +80,7 @@ clear;
         packidAppend=$iname
         packid=$packidAppend$packidString
         longPackID=$packid
+        
         echo "Enter the full name of the pack as you'd like it to appear in the Watchdog's messages and prompts."
         echo "Pack name (ex: Enigmatica 2: Expert):"
         read pname
