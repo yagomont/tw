@@ -56,8 +56,9 @@ fi
 grabWhitelist(){
 loadVars;
 echo "[INFO] grabWhitelist module running on" $shortPackID
+whitelistTime=$((whitelistTimeMins * 60))
 while true; do
-sleep 300
+sleep $whitelistTime
 scp minecraft@51.79.37.10:/home/minecraft/whitelistserver/serverfiles/whitelist.json .
 tmux send -t $shortPackID "whitelist reload" ENTER
 mv -f whitelist.json /home/minecraft/$longPackID/serverfiles/whitelist.json
@@ -67,8 +68,9 @@ done
 saveHandler(){
 loadVars;
 echo "[INFO] saveHandler module running on" $shortPackID
+saveHandlerTime=$((saveHandlerTimeMins * 60))
 while true; do
-sleep 2210
+sleep $saveHandlerTime
 msgAppend="Cleaning memory and saving the world. This will lag a bit."; broadcastInternal;
 command="save-all"; export command=$command; sendCommand;
 
@@ -82,12 +84,22 @@ announceHandler(){
 loadVars;
 echo "[INFO] announceHandler module running on" $shortPackID
 while true; do
-sleep 5000
+sleep 2800
 msgAppend="Is the server lagging or having problems?"; broadcastInternal;
 msgAppend="If it is, tag our @Staff on Discord!"; broadcastInternal;
-msgAppend="You may also use /spark healthreport and /spark tps to see how the server is doing."; broadcastInternal;
 
-if [ "announcement" != "" ]; then
+if [ "$announcement" != "" ]; then
+
+                        load=$(cat /proc/loadavg)
+                        for loadnow in $load
+                        do
+                        sleep 0.1
+                        break;
+                        done
+                        memtotal=$(awk '/MemTotal/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
+                        usemem=$(awk '/MemFree/ { printf "%.3f \n", $2/1024/1024 }' /proc/meminfo)
+                        usemem=$(bc <<< "scale=2; $memtotal - $usemem");
+                        totalmem=$(bc <<< "scale=2; $memtotal * 1" );
 
         sleep $announcementDelay
         msgAppend="$announcement"; broadcastInternal

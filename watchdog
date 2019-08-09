@@ -8,7 +8,7 @@
 # */
 set -a
 # Do not edit unless making a commit
-build="TTK 1.1"
+build="TTK 1.2"
 execdir=$(pwd)
 cfgfile=$execdir"/watchdog.cfg"
 modload=$cfgfile
@@ -371,11 +371,11 @@ unset act
 function broadcast(){
 
                 if [ "$daemonized" == "true" ]; then
-        echo "(debug/sent)"$msg
+        echo " * [SEND] * "$msg
         tmux send -t $shortPackID say "$msg" ENTER
         unset msg
                 else 
-        echo "(debug/silenced)"$msg
+        echo " * [SEND/SILENCED] * "$msg
                 fi
 
 }
@@ -488,7 +488,7 @@ fi
 if [ "$isSingleInstance" == "true" ]; then
 if [ ! "$wcheck" -lt "3" ]; then
         rm $filew 2>/dev/null
-        echo "(wcheck)" "Another watchdog exists. Exiting with error code 1"
+        echo "[ERROR]" "Another watchdog exists. Exiting with error code 1"
         exit 1
 
 fi
@@ -516,8 +516,9 @@ for ((n=0;n<$numThreads;n++)); do sleep $threadSpacing; spawnNormalThread &
 done
 
 # Change priority of the watchdog
-renice -n 20 -p $(pidof -x watchdog) > /dev/null 2>&1
-renice -n 21 -p $(pidof -x java) > /dev/null 2>&1
+renice -n 21 -p $(pidof -x watchdog) > /dev/null 2>&1
+renice -n 20 -p $(pidof -x java) > /dev/null 2>&1
+echo "[INFO] Applied priority values"
 }
 
 showHelp(){
@@ -805,6 +806,8 @@ logCleaner(){
         rm -v /home/$USER/$longPackID/serverfiles/logs/*
         echo "[INFO] Removing crash reports"
         rm -v /home/$USER/$longPackID/serverfiles/crash-reports/*
+        echo "[INFO] Removing TTK log file"
+        rm -v $logfile
 
 }
 
@@ -953,7 +956,7 @@ case "$1" in
                 accessConsole
                 ;;
          *)     
-                echo "[ERROR] Unknown command or no command specified "; echo ""; showHelp; exit 1
+                showHelp; echo "[ERROR] Unknown command or no command specified "; exit 1
                 ;;
 esac
 
