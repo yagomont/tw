@@ -187,6 +187,87 @@ if [ "enforceCfg" != true ]; then
 . watchdog.setup.cfg 2>/dev/null
 fi
 
+function threadingHandler () 
+{
+        undothings ()
+        {
+                rm .threadinfo 2>/dev/null
+                exit 0
+        }
+                        trap undothings INT
+
+                unset thCounter
+                declare -i thCounter=0
+                spinner spinnerDummy &
+                echo "[INFO] Calculating timings. Please wait."
+
+                threadTickTimeArray=()
+                threadSpacingArray=()
+
+                while [ "$thCounter" -lt 4 ]; do
+        # Calculate optimal values for threading. defaults:
+        # threadTickTime="0.66"
+        # masterThreadTickTime="3.66"
+        # threadSpacing="0.66"
+        # numThreads="2"
+        numCores=$(nproc)
+        numCoresAdjusted=$(( numCores - 1 ))
+        if [ "$numCoresAdjusted" -lt 1 ]; then
+        numCoresAdjusted=$numCores
+        numThreads=$numCoresAdjusted
+        else
+        numThreads=$numCoresAdjusted
+        fi
+        baseSleepNumber=$(bc <<< "scale=3; 1 / $numCoresAdjusted")
+        baseThreadSpacing=$(bc <<< "scale=3; 1 / $numCores")
+        weight=$(bc <<< "scale=3; $numCoresAdjusted / 50");
+                        load=$(cat /proc/loadavg)
+                        for loadNumber in $load
+                        do
+                        echo $loadNumber > .threadinfo
+                        break;
+                        done
+        
+         sleepNumberModifierBase=$(ps -h -w -w | grep -i "java" | grep -v "tmux" | wc -l);
+         sleepNumberModifier=$(bc <<< "scale=3; $weight * $sleepNumberModifierBase * $loadNumber");
+
+                threadTickTime=$(bc <<< "scale=3; $baseSleepNumber + $sleepNumberModifier");
+                
+                threadSpacingModifier=$(bc <<< "scale=3; $loadNumber * $weight * 3")
+                threadSpacing=$(bc <<< "scale=3; $baseThreadSpacing + $threadSpacingModifier")
+                masterThreadTickTime=$(bc <<< "scale=2; $threadTickTime * 6 * $loadNumber")
+        echo "Thread Tick Time -> $threadTickTime sec" > .threadinfo
+        echo "Master Tick Time -> $masterThreadTickTime sec" >> .threadinfo
+        echo "Thread Spacing -> $threadSpacing sec" >> .threadinfo
+        echo "Thread Count -> $numThreads" >> .threadinfo
+        clear
+        cat .threadinfo
+
+                threadTickTimeArray[$thCounter]=$threadTickTime
+                threadSpacingArray[$thCounter]=$threadSpacing
+
+                sleep $threadTickTime
+                ((thCounter++))
+
+
+done
+        rm .threadinfo 2>/dev/null
+
+                threadSpacing=$(bc <<< "scale=3; ${threadSpacingArray[1]} + ${threadSpacingArray[2]} + ${threadSpacingArray[3]} + ${threadSpacingArray[0]} / 4")
+                threadTickTime=$(bc <<< "scale=3; ${threadTickTimeArray[1]} + ${threadTickTimeArray[2]} + ${threadTickTimeArray[3]} + ${threadTickTimeArray[0]} / 4")
+
+        echo "[INFO] Calculated timings (tt/mt/ts/tc) -> $threadTickTime | $masterThreadTickTime | $threadSpacing | $numThreads"
+}
+        threadingHandler;
+function spinnerDummy(){
+
+        decoy=".threadinfo"
+        while [ -f "$decoy" ]; do
+                sleep 0.1
+        done
+
+}
+
 # Expose arguments and set some things
  filew=".w"
  filey=".y"
