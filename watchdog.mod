@@ -29,7 +29,7 @@ echo 'bash watchdog.rbs' | at 8:45UTC -M || echo 'bash watchdog.rbs' | at 4:45 -
 msgAppend="§d<Scheduler> Scheduled a restart to 5:00 EDT."; broadcastInternal;
 sleep 120
 msgAppend="§d<Save> Flushing all queued saves to disk. §7This §7will §7lag."; broadcastInternal;
-command="save-all"; export command=$command; sendCommand;
+command="save-all flush"; export command=$command; sendCommand;
 touch .wdr
 fi
 fi
