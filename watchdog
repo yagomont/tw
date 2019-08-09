@@ -258,7 +258,7 @@ done
 
         echo "[INFO] Calculated timings (tt/mt/ts/tc) -> $threadTickTime | $masterThreadTickTime | $threadSpacing | $numThreads"
 }
-        threadingHandler;
+
 function spinnerDummy(){
 
         decoy=".threadinfo"
@@ -885,7 +885,7 @@ case "$1" in
                 showHelp
                 ;;
         "-d"|"daemon"|"d")
-                daemonize
+                threadingHandler; daemonize
                 ;;
         "-l"|"lock"|"pause"|"l")
                 lock
