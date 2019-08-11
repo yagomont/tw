@@ -833,6 +833,7 @@ logCleaner(){
 
 function showLog(){
         numLines=$(tput lines) || numLines=16
+        ((numLines - 2))
 if [ "$exportedStwo" == "watch" ]; then
         fe ()
         {
@@ -847,6 +848,7 @@ cat $logfile
 
 function showMCLog(){
         numLines=$(tput lines) || numLines=16
+        ((numLines - 2))
         if [ "$exportedStwo" == "watch" ]; then
         fe ()
         {
