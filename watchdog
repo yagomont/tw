@@ -832,10 +832,11 @@ logCleaner(){
 }
 
 function showLog(){
+        numLines=$(tput lines) || numLines=16
 if [ "$exportedStwo" == "watch" ]; then
         fe ()
         {
-        echo '[TTK/TW] You are using the dynamic log view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n 36 $logfile
+        echo '[TTK/TW] You are using the dynamic log view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n $numLines $logfile
         }
         export -f fe
         watch -t -n 0.1 -x bash -c fe
@@ -845,10 +846,11 @@ cat $logfile
 }
 
 function showMCLog(){
+        numLines=$(tput lines) || numLines=16
         if [ "$exportedStwo" == "watch" ]; then
         fe ()
         {
-        echo '[TTK/TW] You are using the read-only console view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n 36 /home/"$USER"/"$longPackID"/serverfiles/logs/latest.log
+        echo '[TTK/TW] You are using the read-only console view. Ctrl+C to exit.'; echo '------------' "$longPackID"',' "$pack" '-------------';  tail -n $numLines /home/"$USER"/"$longPackID"/serverfiles/logs/latest.log
         }
         export -f fe
         watch -t -n 0.1 -x bash -c fe
@@ -897,6 +899,7 @@ serverConfigHandler(){
         nano /home/$USER/$longPackID/serverfiles/$file
 
 }
+
 
 # Decide what to run
 case "$1" in 
